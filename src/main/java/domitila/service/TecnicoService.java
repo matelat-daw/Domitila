@@ -2,6 +2,7 @@ package domitila.service;
 
 import domitila.entity.Tecnico;
 import domitila.repository.TecnicoRepository;
+import domitila.security.TecnicoUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,7 +25,7 @@ public class TecnicoService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Tecnico tecnico = tecnicoRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Técnico no encontrado con username: " + username));
-        return new domitila.security.TecnicoPrincipal(tecnico);
+        return new TecnicoUserDetails(tecnico);
     }
 
     // --- MÉTODOS DEL CRUD ---
@@ -33,6 +34,9 @@ public class TecnicoService implements UserDetailsService {
     public Tecnico registrarTecnico(Tecnico tecnico) {
         if (tecnicoRepository.existsByEmail(tecnico.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+        }
+        if (tecnicoRepository.existsByTelefono(tecnico.getTelefono())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El telefono ya está registrado");
         }
 
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
@@ -47,7 +51,7 @@ public class TecnicoService implements UserDetailsService {
     // Leer por ID
     public Tecnico obtenerPorId(Long id) {
         return tecnicoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Técnico no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Técnico no encontrado con ID: " + id));
     }
 
     // Actualizar

@@ -68,22 +68,14 @@ public class JwtService {
 
     // VALIDAR SI EL TOKEN ES CORRECTO Y PERTENECE AL USUARIO
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        final String issuer = extractClaim(token, Claims::getIssuer);
+        final Claims claims = extractAllClaims(token);
+        final String username = claims.getSubject();
+        final String issuer = claims.getIssuer();
 
         return (username.equals(userDetails.getUsername())) 
             && (jwtIssuer.equals(issuer))
-            && hasExpectedAudience(token)
-            && !isTokenExpired(token);
-    }
-
-    // Métodos auxiliares privados de JJWT
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+            && hasExpectedAudience(claims)
+            && !claims.getExpiration().before(new Date());
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -99,8 +91,8 @@ public class JwtService {
                 .getPayload();
     }
 
-    private boolean hasExpectedAudience(String token) {
-        Object audienceClaim = extractAllClaims(token).get("aud");
+    private boolean hasExpectedAudience(Claims claims) {
+        Object audienceClaim = claims.get("aud");
         if (audienceClaim instanceof String audience) {
             return jwtAudience.equals(audience);
         }

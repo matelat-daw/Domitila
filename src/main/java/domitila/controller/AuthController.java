@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -29,6 +30,10 @@ public class AuthController {
 
     private static final String JWT_COOKIE_NAME = "jwt";
     private static final Duration JWT_COOKIE_DURATION = Duration.ofDays(1);
+
+    @Value("${security.jwt.cookie-secure:false}")
+    private boolean secureCookie;
+
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TecnicoService tecnicoService;
@@ -67,7 +72,6 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-        // Set the secure flag to true for production security in logout cookie
         response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie("", Duration.ZERO).toString());
         return ResponseEntity.ok("Sesión cerrada exitosamente. Recuerda eliminar el token en el cliente.");
     }
@@ -75,7 +79,7 @@ public class AuthController {
     private ResponseCookie buildJwtCookie(String token, Duration maxAge) {
         return ResponseCookie.from(JWT_COOKIE_NAME, token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .sameSite("Strict")
                 .path("/")
                 .maxAge(maxAge)
