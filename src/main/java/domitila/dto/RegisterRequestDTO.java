@@ -3,7 +3,13 @@ package domitila.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class RegisterRequestDTO {
 
     @NotBlank(message = "El nombre no puede estar vacío")
@@ -18,28 +24,6 @@ public class RegisterRequestDTO {
     @Size(min = 6, message = "La clave debe tener al menos 6 caracteres")
     private String clave;
 
+    @NotBlank(message = "El teléfono no puede estar vacío")
     private String telefono; // Opcional, por eso no lleva @NotBlank
-
-    // Constructores
-    public RegisterRequestDTO() {}
-
-    public RegisterRequestDTO(String nombre, String email, String clave, String telefono) {
-        this.nombre = nombre;
-        this.email = email;
-        this.clave = clave;
-        this.telefono = telefono;
-    }
-
-    // Getters y Setters
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getClave() { return clave; }
-    public void setClave(String clave) { this.clave = clave; }
-
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
 }

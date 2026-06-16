@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,20 +29,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Desactivamos CSRF porque los tokens JWT ya protegen contra este ataque
+            // La autenticacion actual es stateless y la cookie queda restringida con SameSite=Strict.
             .csrf(AbstractHttpConfigurer::disable)
-            // 2. Configuramos las reglas de acceso a las rutas
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Permite login y registro sin token
-                .anyRequest().authenticated()            // Cualquier otra ruta requerirá token válido
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
-            // 3. Indicamos que la arquitectura es Stateless (Sin estado / Sin sesiones HTTP)
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            // 4. Conectamos nuestro proveedor de datos de usuario y contraseñas
             .authenticationProvider(authenticationProvider())
-            // 5. Añadimos tu filtro JWT antes del filtro de autenticación estándar de Spring
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -52,18 +47,13 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-        
-        // Usa la variable inyectada por Lombok
-        authProvider.setPasswordEncoder(passwordEncoder); 
-        
+
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
-    // Reemplaza tu bean de AuthenticationManager existente por este:
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        // Esta es la forma oficial y recomendada. 
-        // Spring se encarga internamente de vincular tu AuthenticationProvider sin conflictos.
         return config.getAuthenticationManager();
     }
 }

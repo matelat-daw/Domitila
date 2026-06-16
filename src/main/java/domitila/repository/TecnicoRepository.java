@@ -6,4 +6,6 @@ import java.util.Optional;
 
 public interface TecnicoRepository extends JpaRepository<Tecnico, Long> {
     Optional<Tecnico> findByEmail(String email);
+    boolean existsByEmail(String email);
+    boolean existsByTelefono(String telefono);
 }

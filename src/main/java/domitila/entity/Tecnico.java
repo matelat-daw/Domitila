@@ -1,18 +1,28 @@
 package domitila.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
-@Table(name = "tecnicos")
-@Data
+@Table(name = "tecnico")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tecnico { // <-- Ya NO implementa UserDetails 🌟
+@ToString(exclude = "clave")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Tecnico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String nombre;
@@ -23,5 +33,6 @@ public class Tecnico { // <-- Ya NO implementa UserDetails 🌟
     @Column(nullable = false, length = 256)
     private String clave;
 
+    @Column(nullable = false, unique = true)
     private String telefono;
 }

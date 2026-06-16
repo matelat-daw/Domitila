@@ -3,11 +3,13 @@ package domitila.service;
 import domitila.entity.Tecnico;
 import domitila.repository.TecnicoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
@@ -29,6 +31,10 @@ public class TecnicoService implements UserDetailsService {
 
     // Crear (Guardar con contraseña encriptada)
     public Tecnico registrarTecnico(Tecnico tecnico) {
+        if (tecnicoRepository.existsByEmail(tecnico.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+        }
+
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
         return tecnicoRepository.save(tecnico);
     }
@@ -48,6 +54,18 @@ public class TecnicoService implements UserDetailsService {
     public Tecnico actualizarTecnico(Long id, Tecnico datosActualizados) {
         Tecnico tecnicoExistente = obtenerPorId(id);
         
+        // Verificar si el email ya está en uso por otro técnico
+        if (!tecnicoExistente.getEmail().equals(datosActualizados.getEmail()) &&
+            tecnicoRepository.existsByEmail(datosActualizados.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+        }
+        
+        // Verificar si el telefono ya está en uso por otro técnico
+        if (!tecnicoExistente.getTelefono().equals(datosActualizados.getTelefono()) &&
+            tecnicoRepository.existsByTelefono(datosActualizados.getTelefono())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El telefono ya está registrado");
+        }
+        
         tecnicoExistente.setNombre(datosActualizados.getNombre());
         tecnicoExistente.setEmail(datosActualizados.getEmail());
         tecnicoExistente.setTelefono(datosActualizados.getTelefono());
@@ -63,10 +81,6 @@ public class TecnicoService implements UserDetailsService {
     // Eliminar
     public void eliminarTecnico(Long id) {
         Tecnico tecnico = obtenerPorId(id);
-        if (tecnico != null) {
-            tecnicoRepository.delete(tecnico);
-        } else {
-            throw new RuntimeException("Técnico no encontrado con ID: " + id);
-        }
+        tecnicoRepository.delete(tecnico);
     }
 }

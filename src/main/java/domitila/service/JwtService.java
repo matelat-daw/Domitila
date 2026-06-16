@@ -4,15 +4,17 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-import javax.crypto.SecretKey;
+import jakarta.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import javax.crypto.SecretKey;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -32,6 +34,14 @@ public class JwtService {
 
     @Value("${security.jwt.audience}")
     private String jwtAudience;
+
+    private SecretKey signingKey;
+
+    @PostConstruct
+    void initializeSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        signingKey = Keys.hmacShaKeyFor(keyBytes);
+    }
 
     // GENERAR TOKEN (Para el Login)
     public String generateToken(UserDetails userDetails) {
@@ -58,11 +68,12 @@ public class JwtService {
 
     // VALIDAR SI EL TOKEN ES CORRECTO Y PERTENECE AL USUARIO
     public boolean isTokenValid(String token, UserDetails userDetails) {
-    final String username = extractUsername(token);
-    final String issuer = extractClaim(token, Claims::getIssuer);
-    
+        final String username = extractUsername(token);
+        final String issuer = extractClaim(token, Claims::getIssuer);
+
         return (username.equals(userDetails.getUsername())) 
-            && (jwtIssuer.equals(issuer)) // Valida que el emisor sea el tuyo
+            && (jwtIssuer.equals(issuer))
+            && hasExpectedAudience(token)
             && !isTokenExpired(token);
     }
 
@@ -88,8 +99,20 @@ public class JwtService {
                 .getPayload();
     }
 
+    private boolean hasExpectedAudience(String token) {
+        Object audienceClaim = extractAllClaims(token).get("aud");
+        if (audienceClaim instanceof String audience) {
+            return jwtAudience.equals(audience);
+        }
+
+        if (audienceClaim instanceof Collection<?> audiences) {
+            return audiences.contains(jwtAudience);
+        }
+
+        return false;
+    }
+
     private SecretKey getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return signingKey;
     }
 }
