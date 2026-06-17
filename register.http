@@ -1,0 +1,14 @@
+### Registrar un nuevo Técnico (Solo Acceso ADMIN)
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+Authorization: Bearer INSERTA_AQUÍ_EL_JWT_DEL_ADMINISTRADOR
+
+{
+  "nombre": "Juan",
+  "apellido1": "Pérez",
+  "apellido2": "Gómez",
+  "email": "juan.perez@empresa.com",
+  "clave": "Temporal2026*",
+  "telefono": "+34600123456",
+  "roleId": 2
+}

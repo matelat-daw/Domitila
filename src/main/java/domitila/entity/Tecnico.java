@@ -25,7 +25,14 @@ public class Tecnico {
     @EqualsAndHashCode.Include
     private Long id;
 
+    @Column(nullable = false, length = 32)
     private String nombre;
+
+    @Column(nullable = false, length = 24)
+    private String apellido1;
+
+    @Column(length = 24)
+    private String apellido2;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -35,4 +42,8 @@ public class Tecnico {
 
     @Column(nullable = false, unique = true)
     private String telefono;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 }

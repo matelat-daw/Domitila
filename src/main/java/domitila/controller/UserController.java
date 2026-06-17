@@ -26,6 +26,8 @@ public class UserController {
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
         Tecnico nuevoTecnico = Tecnico.builder()
                 .nombre(request.getNombre())
+                .apellido1(request.getApellido1())
+                .apellido2(request.getApellido2())
                 .email(request.getEmail())
                 .clave(request.getClave())
                 .telefono(request.getTelefono())

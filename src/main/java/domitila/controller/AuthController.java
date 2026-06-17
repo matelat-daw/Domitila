@@ -1,10 +1,7 @@
 package domitila.controller;
 
 import domitila.dto.LoginRequestDTO;
-import domitila.dto.RegisterRequestDTO;
-import domitila.entity.Tecnico;
 import domitila.service.JwtService;
-import domitila.service.TecnicoService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.Duration;
@@ -14,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,14 +41,22 @@ public class AuthController {
         @Valid @RequestBody LoginRequestDTO request,
         HttpServletResponse response
     ) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getClave())
-        );
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = jwtService.generateToken(userDetails);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getClave())
+            );
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtService.generateToken(userDetails);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie(token, JWT_COOKIE_DURATION).toString());
-        return ResponseEntity.ok("Login exitoso. Cookie establecida.");
+            response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie(token, JWT_COOKIE_DURATION).toString());
+            return ResponseEntity.ok("Login exitoso. Cookie establecida.");
+        } catch (AuthenticationCredentialsNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Credenciales invalidas.");
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Email o clave incorrectos.");
+        }
     }
 
     @PostMapping("/logout")

@@ -1,6 +1,8 @@
 package domitila.service;
 
 import domitila.entity.Tecnico;
+import domitila.entity.Role;
+import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TecnicoService implements UserDetailsService {
 
+    private static final String DEFAULT_REGISTER_ROLE = "TECNICO";
+
+    private final RoleRepository roleRepository;
     private final TecnicoRepository tecnicoRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -39,6 +44,7 @@ public class TecnicoService implements UserDetailsService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El telefono ya está registrado");
         }
 
+        tecnico.setRole(resolveTecnicoRole());
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
         return tecnicoRepository.save(tecnico);
     }
@@ -86,5 +92,14 @@ public class TecnicoService implements UserDetailsService {
     public void eliminarTecnico(Long id) {
         Tecnico tecnico = obtenerPorId(id);
         tecnicoRepository.delete(tecnico);
+    }
+
+    private Role resolveTecnicoRole() {
+        return roleRepository.findByName(DEFAULT_REGISTER_ROLE)
+                .or(() -> roleRepository.findByName("ROLE_" + DEFAULT_REGISTER_ROLE))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "No existe el rol TECNICO configurado en la base de datos"
+                ));
     }
 }

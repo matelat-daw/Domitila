@@ -3,6 +3,7 @@ package domitila.security;
 import domitila.entity.Tecnico;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,7 +18,7 @@ public class TecnicoUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_TECNICO"));
+        return List.of(new SimpleGrantedAuthority(normalizeRoleName(tecnico.getRole().getName())));
     }
 
     @Override
@@ -48,5 +49,10 @@ public class TecnicoUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    private String normalizeRoleName(String roleName) {
+        String normalizedRole = roleName.trim().toUpperCase(Locale.ROOT);
+        return normalizedRole.startsWith("ROLE_") ? normalizedRole : "ROLE_" + normalizedRole;
     }
 }

@@ -1,0 +1,24 @@
+### 1. Iniciar Sesión (El backend responderá con la cookie Set-Cookie)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "laura.hernandez@gmail.com",
+  "clave": "Anubis@68"
+}
+
+###
+
+### 2. Registrar Técnico (La extensión envía la cookie de sesión automáticamente)
+POST http://localhost:8080/api/user/register
+Content-Type: application/json
+Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzM1ODY0LCJleHAiOjE3ODE4MjIyNjR9.th9NU24s_nPXt8GycB0vTKIH38gT47ejnmNS9fYSgyDSU2F7GCT0FLx6-sYJ223c
+
+{
+  "nombre": "Juan",
+  "apellido1": "Pérez",
+  "apellido2": "Gómez",
+  "email": "juan.perez@domitila.com",
+  "clave": "Temporal2026*",
+  "telefono": "600123456"
+}
