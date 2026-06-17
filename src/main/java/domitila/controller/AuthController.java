@@ -36,7 +36,6 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final TecnicoService tecnicoService;
 
     // 1. ENDPOINT DE LOGIN (Ya lo tenías listo)
     @PostMapping("/login")
@@ -52,22 +51,6 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie(token, JWT_COOKIE_DURATION).toString());
         return ResponseEntity.ok("Login exitoso. Cookie establecida.");
-    }
-
-    // 2. ENDPOINT DE REGISTRO (Nuevo 🚀)
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
-        Tecnico nuevoTecnico = Tecnico.builder()
-                .nombre(request.getNombre())
-                .email(request.getEmail())
-                .clave(request.getClave())
-                .telefono(request.getTelefono())
-                .build();
-
-        tecnicoService.registrarTecnico(nuevoTecnico);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Técnico registrado exitosamente en el sistema");
     }
 
     @PostMapping("/logout")
