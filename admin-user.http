@@ -12,13 +12,13 @@ Content-Type: application/json
 ### 2. Registrar Técnico (La extensión envía la cookie de sesión automáticamente)
 POST http://localhost:8080/api/user/register
 Content-Type: application/json
-Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzM1ODY0LCJleHAiOjE3ODE4MjIyNjR9.th9NU24s_nPXt8GycB0vTKIH38gT47ejnmNS9fYSgyDSU2F7GCT0FLx6-sYJ223c
+Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzY4NTYxLCJleHAiOjE3ODE4NTQ5NjF9.osEHLR5Xbc5TGtUx0kLbEuXPqL3CvayyWWFsavH1eDKxwqT4jJ4I50vVb8TpmaI5
 
 {
   "nombre": "Juan",
   "apellido1": "Pérez",
   "apellido2": "Gómez",
   "email": "juan.perez@domitila.com",
-  "clave": "Temporal2026*",
-  "telefono": "600123456"
+  "clave": "Password@1",
+  "telefono": "611111111"
 }

@@ -4,7 +4,7 @@ import domitila.entity.Tecnico;
 import domitila.entity.Role;
 import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
-import domitila.security.TecnicoUserDetails;
+import domitila.security.TecnicoDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,7 +30,7 @@ public class TecnicoService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Tecnico tecnico = tecnicoRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Técnico no encontrado con username: " + username));
-        return new TecnicoUserDetails(tecnico);
+        return new TecnicoDetails(tecnico);
     }
 
     // --- MÉTODOS DEL CRUD ---

@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @RequiredArgsConstructor
-public class TecnicoUserDetails implements UserDetails {
+public class TecnicoDetails implements UserDetails {
 
     private final Tecnico tecnico;
 

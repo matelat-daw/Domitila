@@ -20,7 +20,7 @@ SET time_zone = "+00:00";
 --
 -- Base de datos: `tecnicos`
 --
-CREATE DATABASE IF NOT EXISTS `tecnicos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_spanish_nopad_ai_ci;
+CREATE DATABASE IF NOT EXISTS `tecnicos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_nopad_ci;
 USE `tecnicos`;
 
 -- --------------------------------------------------------
@@ -32,7 +32,7 @@ USE `tecnicos`;
 CREATE TABLE `role` (
   `id` bigint(20) NOT NULL,
   `name` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_spanish_nopad_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_nopad_ci;
 
 --
 -- Volcado de datos para la tabla `role`
@@ -58,7 +58,7 @@ CREATE TABLE `tecnico` (
   `clave` varchar(256) DEFAULT NULL,
   `telefono` varchar(255) NOT NULL,
   `role_id` bigint(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_spanish_nopad_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_nopad_ci;
 
 --
 -- Volcado de datos para la tabla `tecnico`
