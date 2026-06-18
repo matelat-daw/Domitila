@@ -52,6 +52,8 @@ INSERT INTO `role` (`id`, `name`) VALUES
 CREATE TABLE `tecnico` (
   `id` bigint(20) NOT NULL,
   `nombre` varchar(255) DEFAULT NULL,
+  `apellido1` varchar(255) DEFAULT NULL,
+  `apellido2` varchar(255) DEFAULT NULL,
   `email` varchar(255) NOT NULL,
   `clave` varchar(256) NOT NULL,
   `telefono` varchar(255) NOT NULL
@@ -61,9 +63,10 @@ CREATE TABLE `tecnico` (
 -- Dumping data for table `tecnico`
 --
 
-INSERT INTO `tecnico` (`id`, `nombre`, `email`, `clave`, `telefono`) VALUES
-(1, 'Juan Pérez', 'juan.perez@example.com', '$2a$10$9U1pnd33qHcKX96s6EK3..rwX4Etkt8eutCaY6FuB5/O8avSqK7vm', '600123456'),
-(2, 'Juan Gómez', 'juan.gomez@example.com', '$2a$10$AMHOqg0rt6vALstDTEomA.YeRfXad.3WeNephTe1rRNBDZS.oYHoW', '611123456');
+INSERT INTO `tecnico` (`id`, `nombre`, `apellido1`, `apellido2`, `email`, `clave`, `telefono`) VALUES
+(1, 'Laura', 'Hernández', 'Domitila', 'laura.hernandez@gmail.com', '$2a$12$XVPo2FFGNpyk3pgudQlwvuK30uflP0jvfSfNY3YBYCEkXQ7IauHgW', '611111111', 1),
+(2, 'Juan', 'Pérez', '', 'juan.perez@example.com', '$2a$10$9U1pnd33qHcKX96s6EK3..rwX4Etkt8eutCaY6FuB5/O8avSqK7vm', '600123456'),
+(3, 'Juan', 'Gómez', '', 'juan.gomez@example.com', '$2a$10$AMHOqg0rt6vALstDTEomA.YeRfXad.3WeNephTe1rRNBDZS.oYHoW', '611123456');
 
 -- --------------------------------------------------------
 
@@ -97,7 +100,7 @@ ALTER TABLE `tecnico`
 -- Indexes for table `tecnico_role`
 --
 ALTER TABLE `tecnico_role`
-  ADD KEY `tecnico_id` (`tecnico_id`,`role_id`),
+  ADD KEY `tecnico_id` (`tecnico_id`),
   ADD KEY `role_id` (`role_id`);
 
 --
