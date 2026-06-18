@@ -1,9 +1,11 @@
 package domitila.security;
 
+import domitila.entity.Role;
 import domitila.entity.Tecnico;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +20,14 @@ public class TecnicoDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(normalizeRoleName(tecnico.getRole().getName())));
+        Set<Role> roles = tecnico.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            return List.of();
+        }
+
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(normalizeRoleName(role.getName())))
+                .toList();
     }
 
     @Override

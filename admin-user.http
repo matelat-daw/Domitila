@@ -12,13 +12,13 @@ Content-Type: application/json
 ### 2. Registrar Técnico (La extensión envía la cookie de sesión automáticamente)
 POST http://localhost:8080/api/user/register
 Content-Type: application/json
-Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzY4NTYxLCJleHAiOjE3ODE4NTQ5NjF9.osEHLR5Xbc5TGtUx0kLbEuXPqL3CvayyWWFsavH1eDKxwqT4jJ4I50vVb8TpmaI5
+Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzc0ODEzLCJleHAiOjE3ODE4NjEyMTN9.OWX3GYat0LCIgZl066_Ge0LvBPSlMkeIr85dwPcdwh7E69iDOB5yH9KUGkBbaGrN
 
 {
-  "nombre": "Juan",
-  "apellido1": "Pérez",
-  "apellido2": "Gómez",
-  "email": "juan.perez@domitila.com",
-  "clave": "Password@1",
-  "telefono": "611111111"
+  "nombre": "María",
+  "apellido1": "González",
+  "apellido2": "Rodríguez",
+  "email": "maria.gonzalez@domitila.com",
+  "clave": "Password@2",
+  "telefono": "633333333"
 }

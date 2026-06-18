@@ -1,8 +1,6 @@
 package domitila.service;
 
 import domitila.entity.Tecnico;
-import domitila.entity.Role;
-import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoDetails;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +12,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
 public class TecnicoService implements UserDetailsService {
 
-    private static final String DEFAULT_REGISTER_ROLE = "TECNICO";
-
-    private final RoleRepository roleRepository;
     private final TecnicoRepository tecnicoRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -38,13 +34,15 @@ public class TecnicoService implements UserDetailsService {
     // Crear (Guardar con contraseña encriptada)
     public Tecnico registrarTecnico(Tecnico tecnico) {
         if (tecnicoRepository.existsByEmail(tecnico.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El E-mail ya está Registrado en la Base de Datos");
         }
         if (tecnicoRepository.existsByTelefono(tecnico.getTelefono())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El telefono ya está registrado");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El Teléfono ya está Registrado en la Base de Datos");
         }
 
-        tecnico.setRole(resolveTecnicoRole());
+        if (tecnico.getRoles() == null) {
+            tecnico.setRoles(new HashSet<>());
+        }
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
         return tecnicoRepository.save(tecnico);
     }
@@ -65,20 +63,43 @@ public class TecnicoService implements UserDetailsService {
         Tecnico tecnicoExistente = obtenerPorId(id);
         
         // Verificar si el email ya está en uso por otro técnico
-        if (!tecnicoExistente.getEmail().equals(datosActualizados.getEmail()) &&
-            tecnicoRepository.existsByEmail(datosActualizados.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado");
+        String emailActualizado = datosActualizados.getEmail();
+        if (emailActualizado != null && !emailActualizado.isBlank()
+            && !emailActualizado.equals(tecnicoExistente.getEmail())
+            && tecnicoRepository.existsByEmail(emailActualizado)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El E-mail ya está Registrado en la Base de Datos");
         }
         
         // Verificar si el telefono ya está en uso por otro técnico
-        if (!tecnicoExistente.getTelefono().equals(datosActualizados.getTelefono()) &&
-            tecnicoRepository.existsByTelefono(datosActualizados.getTelefono())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El telefono ya está registrado");
+        String telefonoActualizado = datosActualizados.getTelefono();
+        if (telefonoActualizado != null && !telefonoActualizado.isBlank()
+            && !telefonoActualizado.equals(tecnicoExistente.getTelefono())
+            && tecnicoRepository.existsByTelefono(telefonoActualizado)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El Teléfono ya está Registrado en la Base de Datos");
         }
         
-        tecnicoExistente.setNombre(datosActualizados.getNombre());
-        tecnicoExistente.setEmail(datosActualizados.getEmail());
-        tecnicoExistente.setTelefono(datosActualizados.getTelefono());
+        String nombreActualizado = datosActualizados.getNombre();
+        if (nombreActualizado != null && !nombreActualizado.isBlank()) {
+            tecnicoExistente.setNombre(nombreActualizado);
+        }
+
+        String apellido1Actualizado = datosActualizados.getApellido1();
+        if (apellido1Actualizado != null && !apellido1Actualizado.isBlank()) {
+            tecnicoExistente.setApellido1(apellido1Actualizado);
+        }
+
+        String apellido2Actualizado = datosActualizados.getApellido2();
+        if (apellido2Actualizado != null && !apellido2Actualizado.isBlank()) {
+            tecnicoExistente.setApellido2(apellido2Actualizado);
+        }
+
+        if (emailActualizado != null && !emailActualizado.isBlank()) {
+            tecnicoExistente.setEmail(emailActualizado);
+        }
+
+        if (telefonoActualizado != null && !telefonoActualizado.isBlank()) {
+            tecnicoExistente.setTelefono(telefonoActualizado);
+        }
         
         // Solo actualiza la clave si se envía una nueva en la petición
         if (datosActualizados.getClave() != null && !datosActualizados.getClave().isBlank()) {
@@ -92,14 +113,5 @@ public class TecnicoService implements UserDetailsService {
     public void eliminarTecnico(Long id) {
         Tecnico tecnico = obtenerPorId(id);
         tecnicoRepository.delete(tecnico);
-    }
-
-    private Role resolveTecnicoRole() {
-        return roleRepository.findByName(DEFAULT_REGISTER_ROLE)
-                .or(() -> roleRepository.findByName("ROLE_" + DEFAULT_REGISTER_ROLE))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "No existe el rol TECNICO configurado en la base de datos"
-                ));
     }
 }

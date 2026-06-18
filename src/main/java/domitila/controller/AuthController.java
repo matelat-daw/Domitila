@@ -46,6 +46,15 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getClave())
             );
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            if (!canLogin(userDetails)) {
+                response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie("", Duration.ZERO).toString());
+                if (hasAuthority(userDetails, "ROLE_USUARIO") || hasAuthority(userDetails, "ROLE_USER")) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Los usuarios con rol USUARIO no tienen permiso para loguearse.");
+                }
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("No tienes permiso para loguearte.");
+            }
             String token = jwtService.generateToken(userDetails);
 
             response.addHeader(HttpHeaders.SET_COOKIE, buildJwtCookie(token, JWT_COOKIE_DURATION).toString());
@@ -73,5 +82,14 @@ public class AuthController {
                 .path("/")
                 .maxAge(maxAge)
                 .build();
+    }
+
+    private boolean canLogin(UserDetails userDetails) {
+        return hasAuthority(userDetails, "ROLE_ADMIN") || hasAuthority(userDetails, "ROLE_TECNICO");
+    }
+
+    private boolean hasAuthority(UserDetails userDetails, String authority) {
+        return userDetails.getAuthorities().stream()
+                .anyMatch(a -> authority.equalsIgnoreCase(a.getAuthority()));
     }
 }
