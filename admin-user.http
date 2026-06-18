@@ -12,7 +12,7 @@ Content-Type: application/json
 ### 2. Registrar Técnico (La extensión envía la cookie de sesión automáticamente)
 POST http://localhost:8080/api/user/register
 Content-Type: application/json
-Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzc0ODEzLCJleHAiOjE3ODE4NjEyMTN9.OWX3GYat0LCIgZl066_Ge0LvBPSlMkeIr85dwPcdwh7E69iDOB5yH9KUGkBbaGrN
+Cookie: jwt=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJsYXVyYS5oZXJuYW5kZXpAZ21haWwuY29tIiwiaXNzIjoiZG9taXRpbGEiLCJhdWQiOlsiZG9taXRpbGEiXSwiaWF0IjoxNzgxNzgxNzc1LCJleHAiOjE3ODE4NjgxNzV9.MZkRW4c2pkHZaejlZeYJVVqlTzC_i1A8LNL2QkqfBlqLhJL0DrZaPSgwszevNRw8
 
 {
   "nombre": "María",
