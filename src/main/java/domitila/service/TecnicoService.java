@@ -1,8 +1,13 @@
 package domitila.service;
 
+import domitila.dto.UserSummaryDTO;
+import domitila.entity.Role;
 import domitila.entity.Tecnico;
+import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoDetails;
+import java.util.Comparator;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,12 +17,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
-import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class TecnicoService implements UserDetailsService {
 
+    private static final String DEFAULT_REGISTER_ROLE = "TECNICO";
+
+    private final RoleRepository roleRepository;
     private final TecnicoRepository tecnicoRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -43,6 +51,9 @@ public class TecnicoService implements UserDetailsService {
         if (tecnico.getRoles() == null) {
             tecnico.setRoles(new HashSet<>());
         }
+        if (tecnico.getRoles().isEmpty()) {
+            tecnico.setRoles(Set.of(resolveRoleByName(DEFAULT_REGISTER_ROLE)));
+        }
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
         return tecnicoRepository.save(tecnico);
     }
@@ -50,6 +61,15 @@ public class TecnicoService implements UserDetailsService {
     // Leer todos
     public List<Tecnico> obtenerTodos() {
         return tecnicoRepository.findAll();
+    }
+
+    public List<UserSummaryDTO> obtenerUsuariosExcepto(String emailLogueado) {
+        return tecnicoRepository.findAll().stream()
+                .filter(tecnico -> !tecnico.getEmail().equalsIgnoreCase(emailLogueado))
+                .sorted(Comparator.comparing(Tecnico::getNombre, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(Tecnico::getApellido1, String.CASE_INSENSITIVE_ORDER))
+                .map(this::toUserSummary)
+                .toList();
     }
 
     // Leer por ID
@@ -113,5 +133,62 @@ public class TecnicoService implements UserDetailsService {
     public void eliminarTecnico(Long id) {
         Tecnico tecnico = obtenerPorId(id);
         tecnicoRepository.delete(tecnico);
+    }
+
+    public void actualizarRolUsuario(Long id, Long roleId, String emailLogueado) {
+        Tecnico tecnico = obtenerPorId(id);
+        if (tecnico.getEmail().equalsIgnoreCase(emailLogueado)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No puedes modificar tu propio rol");
+        }
+
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado con ID: " + roleId));
+
+        tecnico.setRoles(Set.of(role));
+        tecnicoRepository.save(tecnico);
+    }
+
+    public void actualizarClaveUsuario(Long id, String nuevaClave) {
+        Tecnico tecnico = obtenerPorId(id);
+        tecnico.setClave(passwordEncoder.encode(nuevaClave));
+        tecnicoRepository.save(tecnico);
+    }
+
+    public void actualizarMiClave(String emailLogueado, String nuevaClave) {
+        Tecnico tecnico = tecnicoRepository.findByEmail(emailLogueado)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Técnico no encontrado con email: " + emailLogueado
+                ));
+
+        tecnico.setClave(passwordEncoder.encode(nuevaClave));
+        tecnicoRepository.save(tecnico);
+    }
+
+    private Role resolveRoleByName(String roleName) {
+        return roleRepository.findByName(roleName)
+                .or(() -> roleRepository.findByName("ROLE_" + roleName))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "No existe el rol " + roleName + " configurado en la base de datos"
+                ));
+    }
+
+    private UserSummaryDTO toUserSummary(Tecnico tecnico) {
+        Set<String> roles = tecnico.getRoles() == null
+                ? Set.of()
+                : tecnico.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(java.util.stream.Collectors.toSet());
+
+        return new UserSummaryDTO(
+                tecnico.getId(),
+                tecnico.getNombre(),
+                tecnico.getApellido1(),
+                tecnico.getApellido2(),
+                tecnico.getEmail(),
+                tecnico.getTelefono(),
+                roles
+        );
     }
 }

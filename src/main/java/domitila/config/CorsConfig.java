@@ -11,7 +11,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 public class CorsConfig {
 
-    @Value("${security.cors.allowed-origin-patterns:http://localhost:*}")
+    @Value("${security.cors.allowed-origin-patterns:http://localhost,http://127.0.0.1,http://localhost:*,http://127.0.0.1:*}")
     private List<String> allowedOriginPatterns;
 
     @Bean

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Usuarios</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-main: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-dark: #1f2937;
+            --text-muted: #4b5563;
+            --border: #e5e7eb;
+            --error: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .w-login { max-width: 400px; }
+        .w-dashboard { max-width: 900px; }
+        .hidden { display: none !important; }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: var(--primary-hover); }
+
+        .btn-alt {
+            background-color: var(--text-muted);
+            width: auto;
+            padding: 6px 12px;
+        }
+
+        .btn-alt:hover { background-color: var(--text-dark); }
+
+        .btn-password {
+            background-color: var(--warning);
+            width: auto;
+            padding: 6px 12px;
+        }
+
+        .btn-password:hover {
+            background-color: #d97706;
+        }
+
+        .btn-inline {
+            width: auto;
+            min-width: 135px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+            background: #fef2f2;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            gap: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f9fafb;
+            padding: 10px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td { background-color: #f9fafb; }
+
+        .action-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .role-select {
+            min-width: 150px;
+            max-width: 150px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-section" class="card w-login">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Usuario / Email</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Ingresar</button>
+        </form>
+        <p id="login-error" class="error-msg hidden"></p>
+    </div>
+
+    <div id="dashboard-section" class="card w-dashboard hidden">
+        <div class="header-panel">
+            <div>
+                <h3>¡Bienvenido/a, <span id="user-name" style="color: var(--primary);"></span>!</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                    Rol: <span id="user-role" class="badge"></span>
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <button id="change-my-password-btn" class="btn-password">Cambiar mi contraseña</button>
+                <button id="logout-btn" class="btn-alt">Salir</button>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 10px;">Lista de Usuarios</h4>
+        <p id="user-error" class="error-msg hidden"></p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const userError = document.getElementById('user-error');
+        const usersTableBody = document.getElementById('users-table-body');
+        const userNameEl = document.getElementById('user-name');
+        const userRoleEl = document.getElementById('user-role');
+        const logoutBtn = document.getElementById('logout-btn');
+        const changeMyPasswordBtn = document.getElementById('change-my-password-btn');
+
+        function formatDisplayNameFromEmail(email) {
+            if (!email) return '';
+            const localPart = email.split('@')[0];
+            return localPart
+                .split(/[._-]+/)
+                .filter(Boolean)
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+                .join(' ');
+        }
+
+        function normalizeRole(roleName) {
+            if (!roleName) return 'Sin rol';
+            const normalized = String(roleName).trim().toUpperCase();
+            return normalized.startsWith('ROLE_') ? normalized.substring(5) : normalized;
+        }
+
+        function getPrimaryRole(user) {
+            if (!user || !Array.isArray(user.roles) || user.roles.length === 0) {
+                return 'Sin rol';
+            }
+            return normalizeRole(user.roles[0]);
+        }
+
+        function getFullName(user) {
+            return [user.nombre, user.apellido1, user.apellido2]
+                .filter(value => value && String(value).trim() !== '')
+                .join(' ');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function updateHeader() {
+            userNameEl.textContent = currentUser?.name || '';
+            userRoleEl.textContent = currentUser?.role || '';
+        }
+
+        function askNewPassword(targetLabel) {
+            const nuevaClave = prompt(`Introduce la nueva contraseña para ${targetLabel}:`);
+            if (nuevaClave === null) return null;
+
+            const trimmedPassword = nuevaClave.trim();
+            if (trimmedPassword.length < 6) {
+                throw new Error('La nueva contraseña debe tener al menos 6 caracteres');
+            }
+
+            const confirmacion = prompt(`Confirma la nueva contraseña para ${targetLabel}:`);
+            if (confirmacion === null) return null;
+
+            if (trimmedPassword !== confirmacion.trim()) {
+                throw new Error('Las contraseñas no coinciden');
+            }
+
+            return trimmedPassword;
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.classList.add('hidden');
+            userError.classList.add('hidden');
+
+            const email = document.getElementById('username').value.trim();
+            const clave = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:8080/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, clave })
+                });
+
+                const message = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(message || 'Credenciales inválidas');
+                }
+
+                currentUser = {
+                    email,
+                    name: formatDisplayNameFromEmail(email),
+                    role: 'ADMIN'
+                };
+
+                updateHeader();
+
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+
+                await fetchUsers();
+
+            } catch (error) {
+                currentUser = null;
+                updateHeader();
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        async function fetchUsers() {
+            userError.classList.add('hidden');
+            usersTableBody.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/users', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar usuarios');
+                }
+
+                const users = await response.json();
+
+                if (currentUser) {
+                    currentUser.role = 'ADMIN';
+                    updateHeader();
+                }
+
+                renderTable(users);
+
+            } catch (error) {
+                userError.textContent = error.message;
+                userError.classList.remove('hidden');
+            }
+        }
+
+        function renderTable(users) {
+            usersTableBody.innerHTML = '';
+
+            if (!Array.isArray(users) || users.length === 0) {
+                usersTableBody.innerHTML =
+                    '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay más usuarios</td></tr>';
+                return;
+            }
+
+            users.forEach(user => {
+                const fullName = getFullName(user);
+                const role = getPrimaryRole(user);
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(user.id)}</td>
+                    <td>${escapeHtml(fullName)}</td>
+                    <td>
+                        <span class="badge" style="background:#dbeafe; color:#1e40af;">
+                            ${escapeHtml(role)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            <select class="role-select" onchange="changeUserRole(${Number(user.id)}, this.value)">
+                                <option value="" selected disabled>Cambiar rol...</option>
+                                <option value="1">Admin</option>
+                                <option value="2">Delegado</option>
+                                <option value="3">Técnico</option>
+                            </select>
+                            <button
+                                type="button"
+                                class="btn-password btn-inline"
+                                onclick="changeUserPassword(${Number(user.id)}, '${escapeHtml(fullName)}')"
+                            >
+                                Cambiar contraseña
+                            </button>
+                        </div>
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        async function changeUserRole(userId, roleId) {
+            userError.classList.add('hidden');
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/users/${userId}/role`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ roleId: Number(roleId) })
+                });
+
+                const message = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(message || 'Error al actualizar rol');
+                }
+
+                await fetchUsers();
+                alert('Rol modificado correctamente');
+
+            } catch (error) {
+                userError.textContent = error.message;
+                userError.classList.remove('hidden');
+            }
+        }
+
+        async function changeUserPassword(userId, userName) {
+            userError.classList.add('hidden');
+
+            try {
+                const nuevaClave = askNewPassword(userName);
+                if (!nuevaClave) return;
+
+                const response = await fetch(`http://localhost:8080/api/users/${userId}/password`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ nuevaClave })
+                });
+
+                const message = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(message || 'Error al actualizar la contraseña');
+                }
+
+                alert(`Contraseña actualizada correctamente para ${userName}`);
+
+            } catch (error) {
+                userError.textContent = error.message;
+                userError.classList.remove('hidden');
+            }
+        }
+
+        async function changeMyPassword() {
+            userError.classList.add('hidden');
+
+            try {
+                const nuevaClave = askNewPassword('tu cuenta');
+                if (!nuevaClave) return;
+
+                const response = await fetch('http://localhost:8080/api/users/me/password', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ nuevaClave })
+                });
+
+                const message = await response.text();
+
+                if (!response.ok) {
+                    throw new Error(message || 'Error al actualizar tu contraseña');
+                }
+
+                alert('Tu contraseña ha sido actualizada correctamente');
+
+            } catch (error) {
+                userError.textContent = error.message;
+                userError.classList.remove('hidden');
+            }
+        }
+
+        changeMyPasswordBtn.addEventListener('click', changeMyPassword);
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('http://localhost:8080/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+            } catch (_) {
+            }
+
+            currentUser = null;
+            updateHeader();
+            usersTableBody.innerHTML = '';
+            loginForm.reset();
+            userError.classList.add('hidden');
+            loginError.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
