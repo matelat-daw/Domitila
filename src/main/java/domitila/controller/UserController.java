@@ -18,14 +18,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
     private final TecnicoService tecnicoService;
 
     // 2. ENDPOINT DE REGISTRO (Nuevo 🚀)
-    @PostMapping("/register")
+    @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
         Tecnico nuevoTecnico = Tecnico.builder()

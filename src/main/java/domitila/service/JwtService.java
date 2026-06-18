@@ -107,4 +107,33 @@ public class JwtService {
     private SecretKey getSignInKey() {
         return signingKey;
     }
+
+    // 1. Generar el Refresh Token (Estilo Moderno)
+    public String generateRefreshToken(UserDetails userDetails) {
+        long sieteDiasEnMilisegundos = 1000L * 60 * 60 * 24 * 7;
+        
+        return Jwts.builder()
+                .subject(userDetails.getUsername()) // 👈 Antes: setSubject
+                .issuedAt(new Date(System.currentTimeMillis())) // 👈 Antes: setIssuedAt
+                .expiration(new Date(System.currentTimeMillis() + sieteDiasEnMilisegundos)) // 👈 Antes: setExpiration
+                .signWith(getSignInKey(), Jwts.SIG.HS256) // 👈 Antes: SignatureAlgorithm.HS256
+                .compact();
+    }
+
+    // 2. Validar si el token es un Refresh Token válido
+    public boolean isRefreshTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        // El método isTokenExpired(token) debe invocar internamente al Parser moderno de JJWT
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    // 1. Verifica si el token ya expiró
+    public boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    // 2. Extrae la fecha de expiración específica del token
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
 }

@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.3deb1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Jun 18, 2026 at 10:50 AM
--- Server version: 12.2.2-MariaDB
--- PHP Version: 8.5.6
+-- Servidor: localhost:3306
+-- Tiempo de generación: 18-06-2026 a las 16:23:12
+-- Versión del servidor: 11.8.6-MariaDB-5 from Ubuntu
+-- Versión de PHP: 8.5.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `tecnicos`
+-- Base de datos: `tecnicos`
 --
 CREATE DATABASE IF NOT EXISTS `tecnicos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_spanish_nopad_ai_ci;
 USE `tecnicos`;
@@ -26,7 +26,7 @@ USE `tecnicos`;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `role`
+-- Estructura de tabla para la tabla `role`
 --
 
 CREATE TABLE `role` (
@@ -35,7 +35,7 @@ CREATE TABLE `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_nopad_ci;
 
 --
--- Dumping data for table `role`
+-- Volcado de datos para la tabla `role`
 --
 
 INSERT INTO `role` (`id`, `name`) VALUES
@@ -46,7 +46,7 @@ INSERT INTO `role` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tecnico`
+-- Estructura de tabla para la tabla `tecnico`
 --
 
 CREATE TABLE `tecnico` (
@@ -59,19 +59,10 @@ CREATE TABLE `tecnico` (
   `telefono` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_spanish_nopad_ai_ci;
 
---
--- Dumping data for table `tecnico`
---
-
-INSERT INTO `tecnico` (`id`, `nombre`, `apellido1`, `apellido2`, `email`, `clave`, `telefono`) VALUES
-(1, 'Laura', 'Hernández', 'Domitila', 'laura.hernandez@gmail.com', '$2a$12$XVPo2FFGNpyk3pgudQlwvuK30uflP0jvfSfNY3YBYCEkXQ7IauHgW', '611111111', 1),
-(2, 'Juan', 'Pérez', '', 'juan.perez@example.com', '$2a$10$9U1pnd33qHcKX96s6EK3..rwX4Etkt8eutCaY6FuB5/O8avSqK7vm', '600123456'),
-(3, 'Juan', 'Gómez', '', 'juan.gomez@example.com', '$2a$10$AMHOqg0rt6vALstDTEomA.YeRfXad.3WeNephTe1rRNBDZS.oYHoW', '611123456');
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tecnico_role`
+-- Estructura de tabla para la tabla `tecnico_role`
 --
 
 CREATE TABLE `tecnico_role` (
@@ -80,49 +71,56 @@ CREATE TABLE `tecnico_role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_spanish_nopad_ai_ci;
 
 --
--- Indexes for dumped tables
+-- Índices para tablas volcadas
 --
 
 --
--- Indexes for table `role`
+-- Indices de la tabla `role`
 --
 ALTER TABLE `role`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `tecnico`
+-- Indices de la tabla `tecnico`
 --
 ALTER TABLE `tecnico`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `email` (`email`,`telefono`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `telefono` (`telefono`);
 
 --
--- Indexes for table `tecnico_role`
+-- Indices de la tabla `tecnico_role`
 --
 ALTER TABLE `tecnico_role`
-  ADD KEY `tecnico_id` (`tecnico_id`),
-  ADD KEY `role_id` (`role_id`);
+  ADD KEY `Referencia a ID de la tabla tecnico` (`tecnico_id`),
+  ADD KEY `Referencia a ID de la tabla role` (`role_id`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT de las tablas volcadas
 --
 
 --
--- AUTO_INCREMENT for table `tecnico`
+-- AUTO_INCREMENT de la tabla `role`
+--
+ALTER TABLE `role`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `tecnico`
 --
 ALTER TABLE `tecnico`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
--- Constraints for dumped tables
+-- Restricciones para tablas volcadas
 --
 
 --
--- Constraints for table `tecnico_role`
+-- Filtros para la tabla `tecnico_role`
 --
 ALTER TABLE `tecnico_role`
-  ADD CONSTRAINT `1` FOREIGN KEY (`tecnico_id`) REFERENCES `tecnico` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `2` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `tecnico_role_ibfk_1` FOREIGN KEY (`tecnico_id`) REFERENCES `tecnico` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tecnico_role_ibfk_2` FOREIGN KEY (`role_id`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

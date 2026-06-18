@@ -65,7 +65,7 @@ public class TecnicoService implements UserDetailsService {
         // Verificar si el email ya está en uso por otro técnico
         String emailActualizado = datosActualizados.getEmail();
         if (emailActualizado != null && !emailActualizado.isBlank()
-            && !emailActualizado.equals(tecnicoExistente.getEmail())
+            && !emailActualizado.equalsIgnoreCase(tecnicoExistente.getEmail())
             && tecnicoRepository.existsByEmail(emailActualizado)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El E-mail ya está Registrado en la Base de Datos");
         }
