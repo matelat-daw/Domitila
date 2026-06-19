@@ -3,7 +3,7 @@ package domitila.controller;
 import domitila.dto.LoginRequestDTO;
 import domitila.dto.UserSummaryDTO;
 import domitila.service.JwtService;
-import domitila.service.TecnicoService;
+import domitila.service.PersonalService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.WebUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -42,7 +43,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
-    private final TecnicoService tecnicoService;
+    private final PersonalService personalService;
 
     // 1. ENDPOINT DE LOGIN (Actualizado con Refresh Token y Estilo Moderno)
     @PostMapping("/login")
@@ -96,29 +97,17 @@ public class AuthController {
         Cookie refreshCookie = WebUtils.getCookie(request, REFRESH_COOKIE_NAME);
 
         if (refreshCookie == null || refreshCookie.getValue() == null || refreshCookie.getValue().isBlank()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token ausente");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh Token ausente");
         }
 
         String refreshToken = refreshCookie.getValue();
+        UserDetails userDetails = validateRefreshToken(refreshToken);
+        String newAccessToken = jwtService.generateToken(userDetails);
+        ResponseCookie accessTokenCookie = buildCookie(JWT_COOKIE_NAME, newAccessToken, Duration.ofMinutes(15));
 
-        try {
-            String username = jwtService.extractUsername(refreshToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            if (jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
-                String newAccessToken = jwtService.generateToken(userDetails);
-
-                ResponseCookie accessTokenCookie = buildCookie(JWT_COOKIE_NAME, newAccessToken, Duration.ofMinutes(15));
-
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                        .body("Sesión extendida exitosamente");
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh Token inválido o expirado");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error al procesar el refresco de sesión");
-        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .body("Sesión extendida exitosamente");
     }
 
     // 3. ENDPOINT DE LOGOUT (Actualizado para limpiar ambas cookies)
@@ -136,7 +125,7 @@ public class AuthController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserSummaryDTO> me(Authentication authentication) {
-        return ResponseEntity.ok(tecnicoService.obtenerResumenUsuario(authentication.getName()));
+        return ResponseEntity.ok(personalService.obtenerResumenPersonal(authentication.getName()));
     }
 
     // Método privado auxiliar unificado para construir cookies limpiamente
@@ -157,5 +146,22 @@ public class AuthController {
     private boolean hasAuthority(UserDetails userDetails, String authority) {
         return userDetails.getAuthorities().stream()
                 .anyMatch(a -> authority.equalsIgnoreCase(a.getAuthority()));
+    }
+
+    private UserDetails validateRefreshToken(String refreshToken) {
+        try {
+            String username = jwtService.extractUsername(refreshToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (!jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh Token inválido o expirado");
+            }
+
+            return userDetails;
+        } catch (ResponseStatusException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh Token inválido o expirado");
+        }
     }
 }

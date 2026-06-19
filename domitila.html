@@ -64,7 +64,7 @@
             font-weight: 500;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border);
@@ -74,9 +74,25 @@
             background-color: #fff;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+        }
+
+        .checkbox-group input {
+            width: auto;
         }
 
         button {
@@ -408,12 +424,98 @@
                                 <input type="email" id="create-user-correo-electronico" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-dni">DNI / NIE</label>
+                                <input type="text" id="create-user-dni" maxlength="15" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-telefono">Tel&eacute;fono</label>
                                 <input type="text" id="create-user-telefono" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-clave">Contraseña</label>
                                 <input type="password" id="create-user-clave" minlength="6" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-sexo">Sexo</label>
+                                <input type="text" id="create-user-sexo" placeholder="Ej. Mujer">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-fecha-nacimiento">Fecha de nacimiento</label>
+                                <input type="date" id="create-user-fecha-nacimiento">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-numero-hijos">Número de hijos</label>
+                                <input type="number" id="create-user-numero-hijos" min="0" step="1">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-tipo-jornada">Tipo de jornada</label>
+                                <select id="create-user-tipo-jornada">
+                                    <option value="">Selecciona...</option>
+                                    <option value="Completa">Completa</option>
+                                    <option value="Parcial">Parcial</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-horas-jornada-parcial">Horas jornada parcial</label>
+                                <input type="number" id="create-user-horas-jornada-parcial" min="0" step="0.01">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-tipo-contrato">Tipo de contrato</label>
+                                <input type="text" id="create-user-tipo-contrato" placeholder="Ej. Temporal">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-grupo-profesional">Grupo profesional</label>
+                                <input type="text" id="create-user-grupo-profesional" maxlength="8">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-convenio-laboral">Convenio laboral</label>
+                                <input type="text" id="create-user-convenio-laboral" maxlength="32">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-numero-cuenta">Número de cuenta</label>
+                                <input type="text" id="create-user-numero-cuenta" maxlength="34">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-fecha-alta">Fecha de alta</label>
+                                <input type="date" id="create-user-fecha-alta">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-fecha-baja">Fecha de baja</label>
+                                <input type="date" id="create-user-fecha-baja">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-salario-bruto">Salario bruto</label>
+                                <input type="number" id="create-user-salario-bruto" min="0" step="0.01">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-dias-vacaciones">Días de vacaciones</label>
+                                <input type="number" id="create-user-dias-vacaciones" min="0" step="1">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-id-categoria-profesional">Categoría profesional</label>
+                                <input type="number" id="create-user-id-categoria-profesional" min="1" step="1">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-titulacion">Titulación</label>
+                                <input type="text" id="create-user-titulacion" maxlength="150">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Discapacidad</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="create-user-discapacidad">
+                                    <span>Marcar si aplica</span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Vehículo</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="create-user-vehiculo">
+                                    <span>Dispone de vehículo</span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
+                                <label for="create-user-domicilio-completo">Domicilio completo</label>
+                                <textarea id="create-user-domicilio-completo" maxlength="255"></textarea>
                             </div>
                         </div>
                         <div class="toolbar-actions" style="margin-top: 14px;">
@@ -470,6 +572,8 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>Correo</th>
+                                <th>Teléfono</th>
                                 <th>Rol</th>
                                 <th>Acción</th>
                             </tr>
@@ -580,8 +684,27 @@
         const createUserApellido1 = document.getElementById('create-user-apellido1');
         const createUserApellido2 = document.getElementById('create-user-apellido2');
         const createUserCorreoElectronico = document.getElementById('create-user-correo-electronico');
+        const createUserDni = document.getElementById('create-user-dni');
         const createUserTelefono = document.getElementById('create-user-telefono');
         const createUserClave = document.getElementById('create-user-clave');
+        const createUserSexo = document.getElementById('create-user-sexo');
+        const createUserFechaNacimiento = document.getElementById('create-user-fecha-nacimiento');
+        const createUserDomicilioCompleto = document.getElementById('create-user-domicilio-completo');
+        const createUserNumeroHijos = document.getElementById('create-user-numero-hijos');
+        const createUserTipoJornada = document.getElementById('create-user-tipo-jornada');
+        const createUserHorasJornadaParcial = document.getElementById('create-user-horas-jornada-parcial');
+        const createUserTipoContrato = document.getElementById('create-user-tipo-contrato');
+        const createUserGrupoProfesional = document.getElementById('create-user-grupo-profesional');
+        const createUserConvenioLaboral = document.getElementById('create-user-convenio-laboral');
+        const createUserNumeroCuenta = document.getElementById('create-user-numero-cuenta');
+        const createUserDiscapacidad = document.getElementById('create-user-discapacidad');
+        const createUserFechaAlta = document.getElementById('create-user-fecha-alta');
+        const createUserFechaBaja = document.getElementById('create-user-fecha-baja');
+        const createUserSalarioBruto = document.getElementById('create-user-salario-bruto');
+        const createUserTitulacion = document.getElementById('create-user-titulacion');
+        const createUserVehiculo = document.getElementById('create-user-vehiculo');
+        const createUserDiasVacaciones = document.getElementById('create-user-dias-vacaciones');
+        const createUserIdCategoriaProfesional = document.getElementById('create-user-id-categoria-profesional');
         const filterNameInput = document.getElementById('filter-name');
         const filterLastNameInput = document.getElementById('filter-lastname');
         const sortUsersSelect = document.getElementById('sort-users');
@@ -609,12 +732,22 @@
             return normalized.startsWith('ROLE_') ? normalized.substring(5) : normalized;
         }
 
-        function getPrimaryRole(user) {
-            if (!user || !Array.isArray(user.roles) || user.roles.length === 0) {
-                return 'Sin rol';
+        function getRoleNames(user) {
+            if (!user || !user.roles) {
+                return [];
             }
 
-            return normalizeRole(user.roles[0]);
+            const roles = Array.isArray(user.roles) ? user.roles : Array.from(user.roles);
+            return roles.map(normalizeRole).filter(role => role !== 'SIN_ROL');
+        }
+
+        function getRolesLabel(user) {
+            const roles = getRoleNames(user);
+            return roles.length === 0 ? 'Sin rol' : roles.join(', ');
+        }
+
+        function hasRole(user, roleName) {
+            return getRoleNames(user).includes(String(roleName).trim().toUpperCase());
         }
 
         function getFullName(user) {
@@ -630,6 +763,31 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
+        }
+
+        function getNullableString(value) {
+            const trimmed = String(value ?? '').trim();
+            return trimmed === '' ? null : trimmed;
+        }
+
+        function getNullableInteger(value) {
+            const normalized = getNullableString(value);
+            if (normalized === null) {
+                return null;
+            }
+
+            const parsed = Number.parseInt(normalized, 10);
+            return Number.isNaN(parsed) ? null : parsed;
+        }
+
+        function getNullableDecimal(value) {
+            const normalized = getNullableString(value);
+            if (normalized === null) {
+                return null;
+            }
+
+            const parsed = Number.parseFloat(normalized);
+            return Number.isNaN(parsed) ? null : parsed;
         }
 
         function getUsersFromResponse(payload) {
@@ -669,16 +827,16 @@
         }
 
         function isAdmin() {
-            return currentUser?.roles?.some(role => normalizeRole(role) === 'ADMIN') ?? false;
+            return hasRole(currentUser, 'ADMIN');
         }
 
         function isTecnico() {
-            return currentUser?.roles?.some(role => normalizeRole(role) === 'TECNICO') ?? false;
+            return hasRole(currentUser, 'TECNICO');
         }
 
         function updateHeader() {
             userNameEl.textContent = currentUser ? getFullName(currentUser) || currentUser.correoElectronico || '' : '';
-            userRoleEl.textContent = currentUser?.role || '';
+            userRoleEl.textContent = currentUser ? getRolesLabel(currentUser) : '';
         }
 
         function updateSectionsVisibility() {
@@ -850,7 +1008,7 @@
             currentUser = {
                 ...user,
                 name: getFullName(user) || user.correoElectronico || '',
-                role: getPrimaryRole(user)
+                role: getRolesLabel(user)
             };
             updateHeader();
             updateSectionsVisibility();
@@ -974,14 +1132,14 @@
 
             if (!Array.isArray(users) || users.length === 0) {
                 usersTableBody.innerHTML =
-                    '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">No hay más usuarios</td></tr>';
+                    '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No hay más usuarios</td></tr>';
                 return;
             }
 
             users.forEach(user => {
                 const fullName = getFullName(user);
-                const role = getPrimaryRole(user);
-                const isTechnicalUser = role === 'TECNICO';
+                const role = getRolesLabel(user);
+                const isTechnicalUser = hasRole(user, 'TECNICO');
                 const assignButton = isTechnicalUser
                     ? `
                         <button
@@ -998,6 +1156,8 @@
                 tr.innerHTML = `
                     <td>${escapeHtml(user.id)}</td>
                     <td>${escapeHtml(fullName)}</td>
+                    <td>${escapeHtml(user.correoElectronico || 'Sin correo')}</td>
+                    <td>${escapeHtml(user.telefono || 'Sin teléfono')}</td>
                     <td>
                         <span class="badge" style="background:#dbeafe; color:#1e40af;">
                             ${escapeHtml(role)}
@@ -1006,11 +1166,13 @@
                     <td>
                         <div class="action-cell">
                             <select class="role-select" onchange="changeUserRole(${Number(user.id)}, this.value)">
-                                <option value="" selected disabled>Cambiar rol...</option>
-                                <option value="none">Quitar rol</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="DELEGADO">Delegado</option>
-                                <option value="TECNICO">Técnico</option>
+                                <option value="" selected disabled>Gestionar roles...</option>
+                                <option value="ADD:ADMIN">Agregar Admin</option>
+                                <option value="ADD:DELEGADO">Agregar Delegado</option>
+                                <option value="ADD:TECNICO">Agregar Técnico</option>
+                                <option value="REMOVE:ADMIN">Quitar Admin</option>
+                                <option value="REMOVE:DELEGADO">Quitar Delegado</option>
+                                <option value="REMOVE:TECNICO">Quitar Técnico</option>
                             </select>
                             <button
                                 type="button"
@@ -1127,10 +1289,29 @@
             const payload = {
                 nombre: createUserNombre.value.trim(),
                 apellido1: createUserApellido1.value.trim(),
-                apellido2: createUserApellido2.value.trim(),
+                apellido2: getNullableString(createUserApellido2.value),
                 correoElectronico: createUserCorreoElectronico.value.trim(),
+                dni: createUserDni.value.trim(),
                 telefono: createUserTelefono.value.trim(),
-                clave: createUserClave.value
+                clave: createUserClave.value,
+                sexo: getNullableString(createUserSexo.value),
+                fechaNacimiento: getNullableString(createUserFechaNacimiento.value),
+                domicilioCompleto: getNullableString(createUserDomicilioCompleto.value),
+                numeroHijos: getNullableInteger(createUserNumeroHijos.value),
+                tipoJornada: getNullableString(createUserTipoJornada.value),
+                horasJornadaParcial: getNullableDecimal(createUserHorasJornadaParcial.value),
+                tipoContrato: getNullableString(createUserTipoContrato.value),
+                grupoProfesional: getNullableString(createUserGrupoProfesional.value),
+                convenioLaboral: getNullableString(createUserConvenioLaboral.value),
+                numeroCuenta: getNullableString(createUserNumeroCuenta.value),
+                discapacidad: createUserDiscapacidad.checked,
+                fechaAlta: getNullableString(createUserFechaAlta.value),
+                fechaBaja: getNullableString(createUserFechaBaja.value),
+                salarioBruto: getNullableDecimal(createUserSalarioBruto.value),
+                titulacion: getNullableString(createUserTitulacion.value),
+                vehiculo: createUserVehiculo.checked,
+                diasVacaciones: getNullableInteger(createUserDiasVacaciones.value),
+                idCategoriaProfesional: getNullableInteger(createUserIdCategoriaProfesional.value)
             };
 
             try {
@@ -1161,18 +1342,22 @@
             }
         }
 
-        async function changeUserRole(userId, roleId) {
+        async function changeUserRole(userId, roleAction) {
             userError.classList.add('hidden');
 
             try {
-                const normalizedRole = roleId === 'none' ? null : String(roleId);
+                const [action, role] = String(roleAction ?? '').split(':');
+                if (!action || !role) {
+                    throw new Error('Debes seleccionar una acción de rol válida');
+                }
+
                 const response = await fetch(`${API_BASE_URL}/api/users/${userId}/role`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     credentials: 'include',
-                    body: JSON.stringify({ role: normalizedRole })
+                    body: JSON.stringify({ role, action })
                 });
 
                 const message = await response.text();
@@ -1182,7 +1367,7 @@
                 }
 
                 await fetchUsers();
-                alert('Rol modificado correctamente');
+                alert(message || 'Roles actualizados correctamente');
             } catch (error) {
                 userError.textContent = error.message;
                 userError.classList.remove('hidden');

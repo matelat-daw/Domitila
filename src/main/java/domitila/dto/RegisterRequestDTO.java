@@ -29,6 +29,7 @@ public record RegisterRequestDTO (
 
     String telefono,
 
+    @NotBlank(message = "El DNI es obligatorio")
     @Size(max = 15, message = "El DNI no puede tener más de 15 caracteres")
     String dni,
 

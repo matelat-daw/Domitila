@@ -4,8 +4,8 @@ import domitila.dto.RegisterRequestDTO;
 import domitila.dto.UpdateUserPasswordRequestDTO;
 import domitila.dto.UpdateUserRoleRequestDTO;
 import domitila.dto.UserSummaryDTO;
-import domitila.entity.Tecnico;
-import domitila.service.TecnicoService;
+import domitila.entity.Personal;
+import domitila.service.PersonalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,7 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 @PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
-    private final TecnicoService tecnicoService;
+    private final PersonalService personalService;
 
     @GetMapping
     public ResponseEntity<Page<UserSummaryDTO>> obtenerUsuarios(
@@ -41,12 +39,12 @@ public class UserController {
             @PageableDefault(size = 10, sort = {"nombre", "apellido1"}) Pageable pageable,
             Authentication authentication
     ) {
-        return ResponseEntity.ok(tecnicoService.obtenerUsuariosExcepto(authentication.getName(), nombre, apellido1, pageable));
+        return ResponseEntity.ok(personalService.obtenerPersonalExcepto(authentication.getName(), nombre, apellido1, pageable));
     }
 
     @PostMapping
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
-        Tecnico nuevoTecnico = Tecnico.builder()
+        Personal nuevoPersonal = Personal.builder()
                 .nombre(request.nombre())
                 .apellido1(request.apellido1())
                 .apellido2(request.apellido2())
@@ -74,27 +72,10 @@ public class UserController {
                 .idCategoriaProfesional(request.idCategoriaProfesional())
                 .build();
 
-        try {
-            tecnicoService.registrarTecnico(nuevoTecnico);
-        } catch (DataIntegrityViolationException ex) {
-            String message = "El E-mail o el Teléfono ya está Registrado en la Base de Datos";
-            String rawMessage = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
-            if (rawMessage != null) {
-                String normalized = rawMessage.toLowerCase();
-                if (normalized.contains("correo_electronico") || normalized.contains("correo electronico") || normalized.contains("email")) {
-                    message = "El correo electrónico ya está registrado en la base de datos";
-                } else if (normalized.contains("telefono") || normalized.contains("teléfono")) {
-                    message = "El Teléfono ya está Registrado en la Base de Datos";
-                }
-            }
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
-        } catch (ResponseStatusException ex) {
-            String body = ex.getReason() != null ? ex.getReason() : "Error";
-            return ResponseEntity.status(ex.getStatusCode()).body(body);
-        }
+        personalService.registrarPersonal(nuevoPersonal);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Técnico registrado exitosamente en el sistema");
+                        .body("Personal registrado exitosamente en el sistema");
     }
 
     @PatchMapping("/{id}/role")
@@ -103,8 +84,8 @@ public class UserController {
             @Valid @RequestBody UpdateUserRoleRequestDTO request,
             Authentication authentication
     ) {
-        tecnicoService.actualizarRolUsuario(id, request.role(), authentication.getName());
-        return ResponseEntity.ok("Rol actualizado exitosamente");
+        personalService.actualizarRolPersonal(id, request.role(), request.action(), authentication.getName());
+        return ResponseEntity.ok("Roles actualizados exitosamente");
     }
 
     @PatchMapping("/me/password")
@@ -112,7 +93,7 @@ public class UserController {
             @Valid @RequestBody UpdateUserPasswordRequestDTO request,
             Authentication authentication
     ) {
-        tecnicoService.actualizarMiClave(authentication.getName(), request.nuevaClave());
+        personalService.actualizarMiClave(authentication.getName(), request.nuevaClave());
         return ResponseEntity.ok("Clave actualizada exitosamente");
     }
 
@@ -122,30 +103,13 @@ public class UserController {
             @Valid @RequestBody UpdateUserPasswordRequestDTO request
     ) {
         Integer idInt = id.intValue();
-        tecnicoService.actualizarClaveUsuario(idInt, request.nuevaClave());
+        personalService.actualizarClavePersonal(idInt, request.nuevaClave());
         return ResponseEntity.ok("Clave actualizada exitosamente");
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizar(@PathVariable Integer id, @RequestBody Tecnico request) {
-        try {
-            tecnicoService.actualizarTecnico(id, request);
-            return ResponseEntity.ok("Técnico actualizado exitosamente en el sistema");
-        } catch (DataIntegrityViolationException ex) {
-            String message = "El E-mail o el Teléfono ya está Registrado en la Base de Datos";
-            String rawMessage = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
-            if (rawMessage != null) {
-                String normalized = rawMessage.toLowerCase();
-                if (normalized.contains("correo_electronico") || normalized.contains("correo electronico") || normalized.contains("email")) {
-                    message = "El correo electrónico ya está registrado en la base de datos";
-                } else if (normalized.contains("telefono") || normalized.contains("teléfono")) {
-                    message = "El Teléfono ya está Registrado en la Base de Datos";
-                }
-            }
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
-        } catch (ResponseStatusException ex) {
-            String body = ex.getReason() != null ? ex.getReason() : "Error";
-            return ResponseEntity.status(ex.getStatusCode()).body(body);
-        }
+    public ResponseEntity<String> actualizar(@PathVariable Integer id, @RequestBody Personal request) {
+        personalService.actualizarPersonal(id, request);
+        return ResponseEntity.ok("Personal actualizado exitosamente en el sistema");
     }
 }

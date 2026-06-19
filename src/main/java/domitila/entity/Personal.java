@@ -14,16 +14,16 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "tecnico")
+@Table(name = "personal_laboral")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"clave", "roles"})
+@ToString(exclude = {"clave"})
 // @ToString(exclude = {"clave", "roles", "proyectos"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Tecnico {
+public class Personal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,7 +40,7 @@ public class Tecnico {
     @Column(name = "apellido2", length = 24)
     private String apellido2;
 
-    @Column(name = "dni", nullable = false, length = 15)
+    @Column(name = "dni", nullable = false, length = 15, unique = true)
     @Builder.Default
     private String dni = "PENDIENTE";
 
@@ -114,22 +114,55 @@ public class Tecnico {
     @Column(name = "id_categoria_profesional", nullable = false)
     @Builder.Default
     private Integer idCategoriaProfesional = 1;
-
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-            name = "tecnico_role",
-            joinColumns = @JoinColumn(name = "tecnico_id")
+            name = "personal_laboral_role",
+            joinColumns = @JoinColumn(name = "trabajador_id", referencedColumnName = "id_trabajador")
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role_id", nullable = false, length = 20)
     @Builder.Default
     private Set<RoleName> roles = new HashSet<>();
 
+    public RoleName getRole() {
+        if (roles == null || roles.isEmpty()) {
+            return null;
+        }
+        return roles.iterator().next();
+    }
+
+    // La tabla intermedia persiste una colección de roles, pero la lógica actual de la app
+    // trabaja con un único rol por usuario desde el servicio y la seguridad.
+    public void setRole(RoleName role) {
+        if (role == null) {
+            this.roles = new HashSet<>();
+            return;
+        }
+        this.roles = new HashSet<>(Set.of(role));
+    }
+
+    public void addRole(RoleName role) {
+        if (role == null) {
+            return;
+        }
+        if (this.roles == null) {
+            this.roles = new HashSet<>();
+        }
+        this.roles.add(role);
+    }
+
+    public void removeRole(RoleName role) {
+        if (role == null || this.roles == null) {
+            return;
+        }
+        this.roles.remove(role);
+    }
+
 //     @ManyToMany(fetch = FetchType.LAZY)
 //     @JoinTable(
-//             name = "tecnico_proyecto",
-//             joinColumns = @JoinColumn(name = "tecnico_id"),
-//             inverseJoinColumns = @JoinColumn(name = "proyecto_id")
+//             name = "personal_laboral_proyecto",
+//             joinColumns = @JoinColumn(name = "trabajador_id", referencedColumnName = "id_trabajador"),
+//             inverseJoinColumns = @JoinColumn(name = "proyecto_id", referencedColumnName = "id_proyecto")
 //     )
     // @Builder.Default
     // private Set<Proyecto> proyectos = new HashSet<>();

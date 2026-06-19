@@ -1,7 +1,7 @@
 package domitila.security;
 
 import domitila.entity.RoleName;
-import domitila.entity.Tecnico;
+import domitila.entity.Personal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -13,13 +13,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Getter
 @RequiredArgsConstructor
-public class TecnicoDetails implements UserDetails {
+public class PersonalDetails implements UserDetails {
 
-    private final Tecnico tecnico;
+    private final Personal personal;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<RoleName> roles = tecnico.getRoles();
+        Set<RoleName> roles = personal.getRoles();
         if (roles == null || roles.isEmpty()) {
             return List.of();
         }
@@ -31,12 +31,12 @@ public class TecnicoDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return tecnico.getClave();
+        return personal.getClave();
     }
 
     @Override
     public String getUsername() {
-        return tecnico.getCorreoElectronico();
+        return personal.getCorreoElectronico();
     }
 
     @Override
@@ -58,5 +58,4 @@ public class TecnicoDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
 }
