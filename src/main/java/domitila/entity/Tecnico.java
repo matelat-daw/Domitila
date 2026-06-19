@@ -20,7 +20,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"clave", "roles", "proyectos"})
+@ToString(exclude = {"clave", "roles"})
+// @ToString(exclude = {"clave", "roles", "proyectos"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Tecnico {
 
@@ -28,7 +29,7 @@ public class Tecnico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_trabajador")
     @EqualsAndHashCode.Include
-    private Long id;
+    private Integer id;
 
     @Column(name = "nombre", nullable = false, length = 32)
     private String nombre;
@@ -124,12 +125,12 @@ public class Tecnico {
     @Builder.Default
     private Set<RoleName> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "tecnico_proyecto",
-            joinColumns = @JoinColumn(name = "tecnico_id"),
-            inverseJoinColumns = @JoinColumn(name = "proyecto_id")
-    )
-    @Builder.Default
-    private Set<Proyecto> proyectos = new HashSet<>();
+//     @ManyToMany(fetch = FetchType.LAZY)
+//     @JoinTable(
+//             name = "tecnico_proyecto",
+//             joinColumns = @JoinColumn(name = "tecnico_id"),
+//             inverseJoinColumns = @JoinColumn(name = "proyecto_id")
+//     )
+    // @Builder.Default
+    // private Set<Proyecto> proyectos = new HashSet<>();
 }

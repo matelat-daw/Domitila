@@ -5,6 +5,7 @@ import domitila.entity.RoleName;
 import domitila.entity.Tecnico;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoDetails;
+import domitila.util.DocumentoIdentidadUtil;
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,7 @@ public class TecnicoService implements UserDetailsService {
         tecnico.setApellido2(normalizarTextoOpcional(tecnico.getApellido2()));
         tecnico.setCorreoElectronico(normalizarTexto(tecnico.getCorreoElectronico()));
         tecnico.setTelefono(normalizarTextoOpcional(tecnico.getTelefono()));
-        tecnico.setDni(normalizarTextoOpcional(tecnico.getDni()));
+        tecnico.setDni(normalizarDocumentoIdentidad(tecnico.getDni()));
         tecnico.setSexo(normalizarTextoOpcional(tecnico.getSexo()));
         tecnico.setDomicilioCompleto(normalizarTextoOpcional(tecnico.getDomicilioCompleto()));
         tecnico.setTipoJornada(normalizarTextoOpcional(tecnico.getTipoJornada()));
@@ -52,6 +53,8 @@ public class TecnicoService implements UserDetailsService {
         tecnico.setConvenioLaboral(normalizarTextoOpcional(tecnico.getConvenioLaboral()));
         tecnico.setNumeroCuenta(normalizarTextoOpcional(tecnico.getNumeroCuenta()));
         tecnico.setTitulacion(normalizarTextoOpcional(tecnico.getTitulacion()));
+
+        validarDniObligatorio(tecnico.getDni());
 
         if (tecnicoRepository.existsByCorreoElectronico(tecnico.getCorreoElectronico())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El correo electrónico ya está registrado en la base de datos");
@@ -86,13 +89,13 @@ public class TecnicoService implements UserDetailsService {
     }
 
     // Leer por ID
-    public Tecnico obtenerPorId(Long id) {
+    public Tecnico obtenerPorId(Integer id) {
         return tecnicoRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Técnico no encontrado con ID: " + id));
     }
 
     // Actualizar
-    public Tecnico actualizarTecnico(Long id, Tecnico datosActualizados) {
+    public Tecnico actualizarTecnico(Integer id, Tecnico datosActualizados) {
         Tecnico tecnicoExistente = obtenerPorId(id);
         
         // Verificar si el correo electrónico ya está en uso por otro técnico
@@ -134,8 +137,9 @@ public class TecnicoService implements UserDetailsService {
             tecnicoExistente.setTelefono(telefonoActualizado);
         }
 
-        String dniActualizado = normalizarTextoOpcional(datosActualizados.getDni());
+        String dniActualizado = normalizarDocumentoIdentidad(datosActualizados.getDni());
         if (dniActualizado != null && !dniActualizado.isBlank()) {
+            validarDniObligatorio(dniActualizado);
             tecnicoExistente.setDni(dniActualizado);
         }
 
@@ -224,12 +228,12 @@ public class TecnicoService implements UserDetailsService {
     }
 
     // Eliminar
-    public void eliminarTecnico(Long id) {
+    public void eliminarTecnico(Integer id) {
         Tecnico tecnico = obtenerPorId(id);
         tecnicoRepository.delete(tecnico);
     }
 
-    public void actualizarRolUsuario(Long id, String role, String correoElectronicoLogueado) {
+    public void actualizarRolUsuario(Integer id, String role, String correoElectronicoLogueado) {
         Tecnico tecnico = obtenerPorId(id);
         if (tecnico.getCorreoElectronico().equalsIgnoreCase(correoElectronicoLogueado)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No puedes modificar tu propio rol");
@@ -246,7 +250,7 @@ public class TecnicoService implements UserDetailsService {
         tecnicoRepository.save(tecnico);
     }
 
-    public void actualizarClaveUsuario(Long id, String nuevaClave) {
+    public void actualizarClaveUsuario(Integer id, String nuevaClave) {
         Tecnico tecnico = obtenerPorId(id);
         tecnico.setClave(passwordEncoder.encode(nuevaClave));
         tecnicoRepository.save(tecnico);
@@ -314,9 +318,6 @@ public class TecnicoService implements UserDetailsService {
     }
 
     private void aplicarDefaultsRegistro(Tecnico tecnico) {
-        if (tecnico.getDni() == null) {
-            tecnico.setDni("PENDIENTE");
-        }
         if (tecnico.getSexo() == null) {
             tecnico.setSexo("No binario");
         }
@@ -354,5 +355,20 @@ public class TecnicoService implements UserDetailsService {
 
         String normalizado = valor.trim();
         return normalizado.isEmpty() ? null : normalizado;
+    }
+
+    private String normalizarDocumentoIdentidad(String valor) {
+        String normalizado = normalizarTextoOpcional(valor);
+        if (normalizado == null) {
+            return null;
+        }
+
+        return normalizado.toUpperCase().replaceAll("[-\\s]", "");
+    }
+
+    private void validarDniObligatorio(String dni) {
+        if (dni == null || !DocumentoIdentidadUtil.validarDniNie(dni)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El DNI/NIE no es válido");
+        }
     }
 }

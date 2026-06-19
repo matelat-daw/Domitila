@@ -99,7 +99,7 @@ public class UserController {
 
     @PatchMapping("/{id}/role")
     public ResponseEntity<String> actualizarRol(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @Valid @RequestBody UpdateUserRoleRequestDTO request,
             Authentication authentication
     ) {
@@ -118,15 +118,16 @@ public class UserController {
 
     @PatchMapping("/{id}/password")
     public ResponseEntity<String> actualizarClaveUsuario(
-            @PathVariable Long id,
+            @PathVariable Integer id,
             @Valid @RequestBody UpdateUserPasswordRequestDTO request
     ) {
-        tecnicoService.actualizarClaveUsuario(id, request.nuevaClave());
+        Integer idInt = id.intValue();
+        tecnicoService.actualizarClaveUsuario(idInt, request.nuevaClave());
         return ResponseEntity.ok("Clave actualizada exitosamente");
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizar(@PathVariable Long id, @RequestBody Tecnico request) {
+    public ResponseEntity<String> actualizar(@PathVariable Integer id, @RequestBody Tecnico request) {
         try {
             tecnicoService.actualizarTecnico(id, request);
             return ResponseEntity.ok("Técnico actualizado exitosamente en el sistema");

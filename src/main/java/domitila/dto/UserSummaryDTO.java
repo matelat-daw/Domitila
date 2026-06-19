@@ -3,7 +3,7 @@ package domitila.dto;
 import java.util.Set;
 
 public record UserSummaryDTO (
-    Long id,
+    Integer id,
     String nombre,
     String apellido1,
     String apellido2,
