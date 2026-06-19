@@ -1,9 +1,8 @@
 package domitila.service;
 
 import domitila.dto.UserSummaryDTO;
-import domitila.entity.Role;
+import domitila.entity.RoleName;
 import domitila.entity.Tecnico;
-import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoDetails;
 import java.util.HashSet;
@@ -24,16 +23,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TecnicoService implements UserDetailsService {
 
-    private static final String DEFAULT_REGISTER_ROLE = "TECNICO";
-
-    private final RoleRepository roleRepository;
     private final TecnicoRepository tecnicoRepository;
     private final PasswordEncoder passwordEncoder;
 
     // Método obligatorio para Spring Security
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Tecnico tecnico = tecnicoRepository.findByEmail(username)
+        Tecnico tecnico = tecnicoRepository.findByCorreoElectronico(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Técnico no encontrado con username: " + username));
         return new TecnicoDetails(tecnico);
     }
@@ -42,19 +38,32 @@ public class TecnicoService implements UserDetailsService {
 
     // Crear (Guardar con contraseña encriptada)
     public Tecnico registrarTecnico(Tecnico tecnico) {
-        if (tecnicoRepository.existsByEmail(tecnico.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El E-mail ya está Registrado en la Base de Datos");
+        tecnico.setNombre(normalizarTexto(tecnico.getNombre()));
+        tecnico.setApellido1(normalizarTexto(tecnico.getApellido1()));
+        tecnico.setApellido2(normalizarTextoOpcional(tecnico.getApellido2()));
+        tecnico.setCorreoElectronico(normalizarTexto(tecnico.getCorreoElectronico()));
+        tecnico.setTelefono(normalizarTextoOpcional(tecnico.getTelefono()));
+        tecnico.setDni(normalizarTextoOpcional(tecnico.getDni()));
+        tecnico.setSexo(normalizarTextoOpcional(tecnico.getSexo()));
+        tecnico.setDomicilioCompleto(normalizarTextoOpcional(tecnico.getDomicilioCompleto()));
+        tecnico.setTipoJornada(normalizarTextoOpcional(tecnico.getTipoJornada()));
+        tecnico.setTipoContrato(normalizarTextoOpcional(tecnico.getTipoContrato()));
+        tecnico.setGrupoProfesional(normalizarTextoOpcional(tecnico.getGrupoProfesional()));
+        tecnico.setConvenioLaboral(normalizarTextoOpcional(tecnico.getConvenioLaboral()));
+        tecnico.setNumeroCuenta(normalizarTextoOpcional(tecnico.getNumeroCuenta()));
+        tecnico.setTitulacion(normalizarTextoOpcional(tecnico.getTitulacion()));
+
+        if (tecnicoRepository.existsByCorreoElectronico(tecnico.getCorreoElectronico())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El correo electrónico ya está registrado en la base de datos");
         }
-        if (tecnicoRepository.existsByTelefono(tecnico.getTelefono())) {
+        if (tecnico.getTelefono() != null && tecnicoRepository.existsByTelefono(tecnico.getTelefono())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El Teléfono ya está Registrado en la Base de Datos");
         }
 
         if (tecnico.getRoles() == null) {
             tecnico.setRoles(new HashSet<>());
         }
-        if (tecnico.getRoles().isEmpty()) {
-            tecnico.setRoles(Set.of(resolveRoleByName(DEFAULT_REGISTER_ROLE)));
-        }
+        aplicarDefaultsRegistro(tecnico);
         tecnico.setClave(passwordEncoder.encode(tecnico.getClave()));
         return tecnicoRepository.save(tecnico);
     }
@@ -65,14 +74,14 @@ public class TecnicoService implements UserDetailsService {
     }
 
     public Page<UserSummaryDTO> obtenerUsuariosExcepto(
-            String emailLogueado,
+            String correoElectronicoLogueado,
             String nombre,
             String apellido1,
             Pageable pageable
     ) {
         String nombreFiltro = normalizarFiltro(nombre);
         String apellido1Filtro = normalizarFiltro(apellido1);
-        return tecnicoRepository.buscarUsuarios(emailLogueado, nombreFiltro, apellido1Filtro, pageable)
+        return tecnicoRepository.buscarUsuarios(correoElectronicoLogueado, nombreFiltro, apellido1Filtro, pageable)
                 .map(this::toUserSummary);
     }
 
@@ -86,43 +95,124 @@ public class TecnicoService implements UserDetailsService {
     public Tecnico actualizarTecnico(Long id, Tecnico datosActualizados) {
         Tecnico tecnicoExistente = obtenerPorId(id);
         
-        // Verificar si el email ya está en uso por otro técnico
-        String emailActualizado = datosActualizados.getEmail();
-        if (emailActualizado != null && !emailActualizado.isBlank()
-            && !emailActualizado.equalsIgnoreCase(tecnicoExistente.getEmail())
-            && tecnicoRepository.existsByEmail(emailActualizado)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "El E-mail ya está Registrado en la Base de Datos");
+        // Verificar si el correo electrónico ya está en uso por otro técnico
+        String correoElectronicoActualizado = normalizarTextoOpcional(datosActualizados.getCorreoElectronico());
+        if (correoElectronicoActualizado != null && !correoElectronicoActualizado.isBlank()
+            && !correoElectronicoActualizado.equalsIgnoreCase(tecnicoExistente.getCorreoElectronico())
+            && tecnicoRepository.existsByCorreoElectronico(correoElectronicoActualizado)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El correo electrónico ya está registrado en la base de datos");
         }
         
         // Verificar si el telefono ya está en uso por otro técnico
-        String telefonoActualizado = datosActualizados.getTelefono();
-        if (telefonoActualizado != null && !telefonoActualizado.isBlank()
+        String telefonoActualizado = normalizarTextoOpcional(datosActualizados.getTelefono());
+        if (telefonoActualizado != null
             && !telefonoActualizado.equals(tecnicoExistente.getTelefono())
             && tecnicoRepository.existsByTelefono(telefonoActualizado)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El Teléfono ya está Registrado en la Base de Datos");
         }
         
-        String nombreActualizado = datosActualizados.getNombre();
+        String nombreActualizado = normalizarTextoOpcional(datosActualizados.getNombre());
         if (nombreActualizado != null && !nombreActualizado.isBlank()) {
             tecnicoExistente.setNombre(nombreActualizado);
         }
 
-        String apellido1Actualizado = datosActualizados.getApellido1();
+        String apellido1Actualizado = normalizarTextoOpcional(datosActualizados.getApellido1());
         if (apellido1Actualizado != null && !apellido1Actualizado.isBlank()) {
             tecnicoExistente.setApellido1(apellido1Actualizado);
         }
 
-        String apellido2Actualizado = datosActualizados.getApellido2();
-        if (apellido2Actualizado != null && !apellido2Actualizado.isBlank()) {
+        if (datosActualizados.getApellido2() != null) {
+            String apellido2Actualizado = normalizarTextoOpcional(datosActualizados.getApellido2());
             tecnicoExistente.setApellido2(apellido2Actualizado);
         }
 
-        if (emailActualizado != null && !emailActualizado.isBlank()) {
-            tecnicoExistente.setEmail(emailActualizado);
+        if (correoElectronicoActualizado != null) {
+            tecnicoExistente.setCorreoElectronico(correoElectronicoActualizado);
         }
 
-        if (telefonoActualizado != null && !telefonoActualizado.isBlank()) {
+        if (datosActualizados.getTelefono() != null) {
             tecnicoExistente.setTelefono(telefonoActualizado);
+        }
+
+        String dniActualizado = normalizarTextoOpcional(datosActualizados.getDni());
+        if (dniActualizado != null && !dniActualizado.isBlank()) {
+            tecnicoExistente.setDni(dniActualizado);
+        }
+
+        String sexoActualizado = normalizarTextoOpcional(datosActualizados.getSexo());
+        if (sexoActualizado != null && !sexoActualizado.isBlank()) {
+            tecnicoExistente.setSexo(sexoActualizado);
+        }
+
+        if (datosActualizados.getFechaNacimiento() != null) {
+            tecnicoExistente.setFechaNacimiento(datosActualizados.getFechaNacimiento());
+        }
+
+        if (datosActualizados.getDomicilioCompleto() != null) {
+            tecnicoExistente.setDomicilioCompleto(normalizarTextoOpcional(datosActualizados.getDomicilioCompleto()));
+        }
+
+        if (datosActualizados.getNumeroHijos() != null) {
+            tecnicoExistente.setNumeroHijos(datosActualizados.getNumeroHijos());
+        }
+
+        String tipoJornadaActualizado = normalizarTextoOpcional(datosActualizados.getTipoJornada());
+        if (tipoJornadaActualizado != null && !tipoJornadaActualizado.isBlank()) {
+            tecnicoExistente.setTipoJornada(tipoJornadaActualizado);
+        }
+
+        if (datosActualizados.getHorasJornadaParcial() != null) {
+            tecnicoExistente.setHorasJornadaParcial(datosActualizados.getHorasJornadaParcial());
+        }
+
+        String tipoContratoActualizado = normalizarTextoOpcional(datosActualizados.getTipoContrato());
+        if (tipoContratoActualizado != null && !tipoContratoActualizado.isBlank()) {
+            tecnicoExistente.setTipoContrato(tipoContratoActualizado);
+        }
+
+        String grupoProfesionalActualizado = normalizarTextoOpcional(datosActualizados.getGrupoProfesional());
+        if (grupoProfesionalActualizado != null && !grupoProfesionalActualizado.isBlank()) {
+            tecnicoExistente.setGrupoProfesional(grupoProfesionalActualizado);
+        }
+
+        if (datosActualizados.getConvenioLaboral() != null) {
+            tecnicoExistente.setConvenioLaboral(normalizarTextoOpcional(datosActualizados.getConvenioLaboral()));
+        }
+
+        if (datosActualizados.getNumeroCuenta() != null) {
+            tecnicoExistente.setNumeroCuenta(normalizarTextoOpcional(datosActualizados.getNumeroCuenta()));
+        }
+
+        if (datosActualizados.getDiscapacidad() != null) {
+            tecnicoExistente.setDiscapacidad(datosActualizados.getDiscapacidad());
+        }
+
+        if (datosActualizados.getFechaAlta() != null) {
+            tecnicoExistente.setFechaAlta(datosActualizados.getFechaAlta());
+        }
+
+        if (datosActualizados.getFechaBaja() != null) {
+            tecnicoExistente.setFechaBaja(datosActualizados.getFechaBaja());
+        }
+
+        if (datosActualizados.getSalarioBruto() != null) {
+            tecnicoExistente.setSalarioBruto(datosActualizados.getSalarioBruto());
+        }
+
+        if (datosActualizados.getTitulacion() != null) {
+            tecnicoExistente.setTitulacion(normalizarTextoOpcional(datosActualizados.getTitulacion()));
+        }
+
+        if (datosActualizados.getVehiculo() != null) {
+            tecnicoExistente.setVehiculo(datosActualizados.getVehiculo());
+        }
+
+        if (datosActualizados.getDiasVacaciones() != null) {
+            tecnicoExistente.setDiasVacaciones(datosActualizados.getDiasVacaciones());
+        }
+
+        if (datosActualizados.getIdCategoriaProfesional() != null) {
+            tecnicoExistente.setIdCategoriaProfesional(datosActualizados.getIdCategoriaProfesional());
         }
         
         // Solo actualiza la clave si se envía una nueva en la petición
@@ -139,16 +229,20 @@ public class TecnicoService implements UserDetailsService {
         tecnicoRepository.delete(tecnico);
     }
 
-    public void actualizarRolUsuario(Long id, Long roleId, String emailLogueado) {
+    public void actualizarRolUsuario(Long id, String role, String correoElectronicoLogueado) {
         Tecnico tecnico = obtenerPorId(id);
-        if (tecnico.getEmail().equalsIgnoreCase(emailLogueado)) {
+        if (tecnico.getCorreoElectronico().equalsIgnoreCase(correoElectronicoLogueado)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No puedes modificar tu propio rol");
         }
 
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol no encontrado con ID: " + roleId));
+        if (role == null || role.isBlank() || "NONE".equalsIgnoreCase(role) || "SIN_ROL".equalsIgnoreCase(role)) {
+            tecnico.setRoles(Set.of());
+            tecnicoRepository.save(tecnico);
+            return;
+        }
 
-        tecnico.setRoles(Set.of(role));
+        RoleName resolvedRole = parseRole(role);
+        tecnico.setRoles(Set.of(resolvedRole));
         tecnicoRepository.save(tecnico);
     }
 
@@ -158,34 +252,25 @@ public class TecnicoService implements UserDetailsService {
         tecnicoRepository.save(tecnico);
     }
 
-    public void actualizarMiClave(String emailLogueado, String nuevaClave) {
-        Tecnico tecnico = tecnicoRepository.findByEmail(emailLogueado)
+    public void actualizarMiClave(String correoElectronicoLogueado, String nuevaClave) {
+        Tecnico tecnico = tecnicoRepository.findByCorreoElectronico(correoElectronicoLogueado)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Técnico no encontrado con email: " + emailLogueado
+                        "Técnico no encontrado con correo electrónico: " + correoElectronicoLogueado
                 ));
 
         tecnico.setClave(passwordEncoder.encode(nuevaClave));
         tecnicoRepository.save(tecnico);
     }
 
-    public UserSummaryDTO obtenerResumenUsuario(String email) {
-        Tecnico tecnico = tecnicoRepository.findByEmail(email)
+    public UserSummaryDTO obtenerResumenUsuario(String correoElectronico) {
+        Tecnico tecnico = tecnicoRepository.findByCorreoElectronico(correoElectronico)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "Técnico no encontrado con email: " + email
+                        "Técnico no encontrado con correo electrónico: " + correoElectronico
                 ));
 
         return toUserSummary(tecnico);
-    }
-
-    private Role resolveRoleByName(String roleName) {
-        return roleRepository.findByName(roleName)
-                .or(() -> roleRepository.findByName("ROLE_" + roleName))
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.INTERNAL_SERVER_ERROR,
-                        "No existe el rol " + roleName + " configurado en la base de datos"
-                ));
     }
 
     private String normalizarFiltro(String valor) {
@@ -201,7 +286,7 @@ public class TecnicoService implements UserDetailsService {
         Set<String> roles = tecnico.getRoles() == null
                 ? Set.of()
                 : tecnico.getRoles().stream()
-                        .map(Role::getName)
+                        .map(role -> "ROLE_" + role.name())
                         .collect(java.util.stream.Collectors.toSet());
 
         return new UserSummaryDTO(
@@ -209,9 +294,65 @@ public class TecnicoService implements UserDetailsService {
                 tecnico.getNombre(),
                 tecnico.getApellido1(),
                 tecnico.getApellido2(),
-                tecnico.getEmail(),
+                tecnico.getCorreoElectronico(),
                 tecnico.getTelefono(),
                 roles
         );
+    }
+
+    private RoleName parseRole(String role) {
+        String normalized = role.trim().toUpperCase();
+        if (normalized.startsWith("ROLE_")) {
+            normalized = normalized.substring(5);
+        }
+
+        try {
+            return RoleName.valueOf(normalized);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol inválido: " + role);
+        }
+    }
+
+    private void aplicarDefaultsRegistro(Tecnico tecnico) {
+        if (tecnico.getDni() == null) {
+            tecnico.setDni("PENDIENTE");
+        }
+        if (tecnico.getSexo() == null) {
+            tecnico.setSexo("No binario");
+        }
+        if (tecnico.getNumeroHijos() == null) {
+            tecnico.setNumeroHijos(0);
+        }
+        if (tecnico.getTipoJornada() == null) {
+            tecnico.setTipoJornada("Completa");
+        }
+        if (tecnico.getTipoContrato() == null) {
+            tecnico.setTipoContrato("Temporal");
+        }
+        if (tecnico.getGrupoProfesional() == null) {
+            tecnico.setGrupoProfesional("1");
+        }
+        if (tecnico.getDiscapacidad() == null) {
+            tecnico.setDiscapacidad(false);
+        }
+        if (tecnico.getVehiculo() == null) {
+            tecnico.setVehiculo(false);
+        }
+        if (tecnico.getIdCategoriaProfesional() == null) {
+            tecnico.setIdCategoriaProfesional(1);
+        }
+    }
+
+    private String normalizarTexto(String valor) {
+        return valor == null ? null : valor.trim();
+    }
+
+    private String normalizarTextoOpcional(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String normalizado = valor.trim();
+        return normalizado.isEmpty() ? null : normalizado;
     }
 }

@@ -50,7 +50,7 @@ public class AuthController {
         try {
             // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.clave())
+                new UsernamePasswordAuthenticationToken(request.correoElectronico(), request.clave())
             );
             
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -86,7 +86,7 @@ public class AuthController {
         } catch (AuthenticationCredentialsNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales invalidas.");
         } catch (org.springframework.security.core.AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email o clave incorrectos.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Correo electrónico o clave incorrectos.");
         }
     }
 

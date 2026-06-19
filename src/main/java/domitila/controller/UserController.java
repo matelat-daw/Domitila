@@ -50,9 +50,28 @@ public class UserController {
                 .nombre(request.nombre())
                 .apellido1(request.apellido1())
                 .apellido2(request.apellido2())
-                .email(request.email())
+                .correoElectronico(request.correoElectronico())
                 .clave(request.clave())
                 .telefono(request.telefono())
+                .dni(request.dni())
+                .sexo(request.sexo())
+                .fechaNacimiento(request.fechaNacimiento())
+                .domicilioCompleto(request.domicilioCompleto())
+                .numeroHijos(request.numeroHijos())
+                .tipoJornada(request.tipoJornada())
+                .horasJornadaParcial(request.horasJornadaParcial())
+                .tipoContrato(request.tipoContrato())
+                .grupoProfesional(request.grupoProfesional())
+                .convenioLaboral(request.convenioLaboral())
+                .numeroCuenta(request.numeroCuenta())
+                .discapacidad(request.discapacidad())
+                .fechaAlta(request.fechaAlta())
+                .fechaBaja(request.fechaBaja())
+                .salarioBruto(request.salarioBruto())
+                .titulacion(request.titulacion())
+                .vehiculo(request.vehiculo())
+                .diasVacaciones(request.diasVacaciones())
+                .idCategoriaProfesional(request.idCategoriaProfesional())
                 .build();
 
         try {
@@ -62,8 +81,8 @@ public class UserController {
             String rawMessage = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
             if (rawMessage != null) {
                 String normalized = rawMessage.toLowerCase();
-                if (normalized.contains("email")) {
-                    message = "El E-mail ya está Registrado en la Base de Datos";
+                if (normalized.contains("correo_electronico") || normalized.contains("correo electronico") || normalized.contains("email")) {
+                    message = "El correo electrónico ya está registrado en la base de datos";
                 } else if (normalized.contains("telefono") || normalized.contains("teléfono")) {
                     message = "El Teléfono ya está Registrado en la Base de Datos";
                 }
@@ -84,7 +103,7 @@ public class UserController {
             @Valid @RequestBody UpdateUserRoleRequestDTO request,
             Authentication authentication
     ) {
-        tecnicoService.actualizarRolUsuario(id, request.roleId(), authentication.getName());
+        tecnicoService.actualizarRolUsuario(id, request.role(), authentication.getName());
         return ResponseEntity.ok("Rol actualizado exitosamente");
     }
 
@@ -116,8 +135,8 @@ public class UserController {
             String rawMessage = ex.getMostSpecificCause() != null ? ex.getMostSpecificCause().getMessage() : ex.getMessage();
             if (rawMessage != null) {
                 String normalized = rawMessage.toLowerCase();
-                if (normalized.contains("email")) {
-                    message = "El E-mail ya está Registrado en la Base de Datos";
+                if (normalized.contains("correo_electronico") || normalized.contains("correo electronico") || normalized.contains("email")) {
+                    message = "El correo electrónico ya está registrado en la base de datos";
                 } else if (normalized.contains("telefono") || normalized.contains("teléfono")) {
                     message = "El Teléfono ya está Registrado en la Base de Datos";
                 }

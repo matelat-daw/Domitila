@@ -7,7 +7,7 @@ public record UserSummaryDTO (
     String nombre,
     String apellido1,
     String apellido2,
-    String email,
+    String correoElectronico,
     String telefono,
     Set<String> roles
 ) {}

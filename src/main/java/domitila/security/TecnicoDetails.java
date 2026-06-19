@@ -1,10 +1,9 @@
 package domitila.security;
 
-import domitila.entity.Role;
+import domitila.entity.RoleName;
 import domitila.entity.Tecnico;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +19,13 @@ public class TecnicoDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Set<Role> roles = tecnico.getRoles();
+        Set<RoleName> roles = tecnico.getRoles();
         if (roles == null || roles.isEmpty()) {
             return List.of();
         }
 
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(normalizeRoleName(role.getName())))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .toList();
     }
 
@@ -37,7 +36,7 @@ public class TecnicoDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return tecnico.getEmail();
+        return tecnico.getCorreoElectronico();
     }
 
     @Override
@@ -60,8 +59,4 @@ public class TecnicoDetails implements UserDetails {
         return true;
     }
 
-    private String normalizeRoleName(String roleName) {
-        String normalizedRole = roleName.trim().toUpperCase(Locale.ROOT);
-        return normalizedRole.startsWith("ROLE_") ? normalizedRole : "ROLE_" + normalizedRole;
-    }
 }
