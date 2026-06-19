@@ -29,8 +29,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Omite de forma perfecta login, logout y refresh sin validar token de acceso
-        return request.getRequestURI().startsWith("/api/auth/");
+        // Solo omite endpoints públicos de autenticación. `/api/auth/me` sí necesita JWT.
+        String uri = request.getRequestURI();
+        return "/api/auth/login".equals(uri)
+                || "/api/auth/refresh".equals(uri)
+                || "/api/auth/logout".equals(uri);
     }
 
     @Override

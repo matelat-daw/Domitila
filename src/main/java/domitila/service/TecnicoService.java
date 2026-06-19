@@ -6,9 +6,11 @@ import domitila.entity.Tecnico;
 import domitila.repository.RoleRepository;
 import domitila.repository.TecnicoRepository;
 import domitila.security.TecnicoDetails;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +18,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -63,13 +64,16 @@ public class TecnicoService implements UserDetailsService {
         return tecnicoRepository.findAll();
     }
 
-    public List<UserSummaryDTO> obtenerUsuariosExcepto(String emailLogueado) {
-        return tecnicoRepository.findAll().stream()
-                .filter(tecnico -> !tecnico.getEmail().equalsIgnoreCase(emailLogueado))
-                .sorted(Comparator.comparing(Tecnico::getNombre, String.CASE_INSENSITIVE_ORDER)
-                        .thenComparing(Tecnico::getApellido1, String.CASE_INSENSITIVE_ORDER))
-                .map(this::toUserSummary)
-                .toList();
+    public Page<UserSummaryDTO> obtenerUsuariosExcepto(
+            String emailLogueado,
+            String nombre,
+            String apellido1,
+            Pageable pageable
+    ) {
+        String nombreFiltro = normalizarFiltro(nombre);
+        String apellido1Filtro = normalizarFiltro(apellido1);
+        return tecnicoRepository.buscarUsuarios(emailLogueado, nombreFiltro, apellido1Filtro, pageable)
+                .map(this::toUserSummary);
     }
 
     // Leer por ID
@@ -165,6 +169,16 @@ public class TecnicoService implements UserDetailsService {
         tecnicoRepository.save(tecnico);
     }
 
+    public UserSummaryDTO obtenerResumenUsuario(String email) {
+        Tecnico tecnico = tecnicoRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Técnico no encontrado con email: " + email
+                ));
+
+        return toUserSummary(tecnico);
+    }
+
     private Role resolveRoleByName(String roleName) {
         return roleRepository.findByName(roleName)
                 .or(() -> roleRepository.findByName("ROLE_" + roleName))
@@ -172,6 +186,15 @@ public class TecnicoService implements UserDetailsService {
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         "No existe el rol " + roleName + " configurado en la base de datos"
                 ));
+    }
+
+    private String normalizarFiltro(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String valorNormalizado = valor.trim();
+        return valorNormalizado.isEmpty() ? null : valorNormalizado;
     }
 
     private UserSummaryDTO toUserSummary(Tecnico tecnico) {

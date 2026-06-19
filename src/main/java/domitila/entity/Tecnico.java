@@ -1,6 +1,7 @@
 package domitila.entity;
 
 import jakarta.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +18,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "clave")
+@ToString(exclude = {"clave", "roles", "proyectos"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Tecnico {
 
@@ -51,4 +52,13 @@ public class Tecnico {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "tecnico_proyecto",
+            joinColumns = @JoinColumn(name = "tecnico_id"),
+            inverseJoinColumns = @JoinColumn(name = "proyecto_id")
+    )
+    @Builder.Default
+    private Set<Proyecto> proyectos = new HashSet<>();
 }

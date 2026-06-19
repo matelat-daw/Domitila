@@ -1,14 +1,8 @@
 package domitila.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class UpdateUserRoleRequestDTO {
+public record UpdateUserRoleRequestDTO (
     @NotNull(message = "El roleId es obligatorio")
-    private Long roleId;
-}
+    Long roleId
+) {}

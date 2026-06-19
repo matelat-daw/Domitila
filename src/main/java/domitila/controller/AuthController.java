@@ -1,7 +1,9 @@
 package domitila.controller;
 
 import domitila.dto.LoginRequestDTO;
+import domitila.dto.UserSummaryDTO;
 import domitila.service.JwtService;
+import domitila.service.TecnicoService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -15,9 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +42,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final TecnicoService tecnicoService;
 
     // 1. ENDPOINT DE LOGIN (Actualizado con Refresh Token y Estilo Moderno)
     @PostMapping("/login")
@@ -45,7 +50,7 @@ public class AuthController {
         try {
             // Authenticate the user
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getClave())
+                new UsernamePasswordAuthenticationToken(request.email(), request.clave())
             );
             
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -126,6 +131,12 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, deleteAccessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, deleteRefreshCookie.toString()) // 👈 Destruye ambas cookies
                 .body("Sesión cerrada exitosamente.");
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserSummaryDTO> me(Authentication authentication) {
+        return ResponseEntity.ok(tecnicoService.obtenerResumenUsuario(authentication.getName()));
     }
 
     // Método privado auxiliar unificado para construir cookies limpiamente

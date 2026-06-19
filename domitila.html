@@ -44,7 +44,7 @@
         }
 
         .w-login { max-width: 400px; }
-        .w-dashboard { max-width: 900px; }
+        .w-dashboard { max-width: 1200px; }
         .hidden { display: none !important; }
 
         h2 {
@@ -193,6 +193,133 @@
             min-width: 150px;
             max-width: 150px;
         }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            align-items: end;
+            margin-top: 12px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-actions button {
+            width: auto;
+            min-width: 110px;
+        }
+
+        .table-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            width: auto;
+            min-width: 110px;
+            padding: 8px 12px;
+        }
+
+        .pagination-status {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .section-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            background: #fcfcfd;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .section-heading h4 {
+            margin: 0;
+        }
+
+        .project-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .detail-panel {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            background: #fff;
+        }
+
+        .detail-panel h5 {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .detail-panel dl {
+            display: grid;
+            grid-template-columns: 90px 1fr;
+            gap: 8px 12px;
+            font-size: 14px;
+        }
+
+        .detail-panel dt {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .detail-panel dd {
+            margin: 0;
+        }
+
+        .detail-list {
+            margin-top: 14px;
+            padding-left: 18px;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .detail-list li + li {
+            margin-top: 6px;
+        }
+
+        @media (max-width: 980px) {
+            .project-layout {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -228,47 +355,178 @@
             </div>
         </div>
 
-        <h4 style="margin-bottom: 10px;">Lista de Usuarios</h4>
-        <p id="user-error" class="error-msg hidden"></p>
+        <div class="dashboard-grid">
+            <section id="users-section" class="section-card hidden">
+                <div class="section-heading">
+                    <h4>Lista de Usuarios</h4>
+                </div>
+                <p id="user-error" class="error-msg hidden"></p>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Rol</th>
-                        <th>Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="users-table-body"></tbody>
-            </table>
+                <div class="toolbar">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter-name">Buscar por nombre</label>
+                        <input type="text" id="filter-name" placeholder="Ej. Juan">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter-lastname">Buscar por apellido1</label>
+                        <input type="text" id="filter-lastname" placeholder="Ej. Pérez">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="sort-users">Ordenar por</label>
+                        <select id="sort-users">
+                            <option value="nombre,asc">Nombre ascendente</option>
+                            <option value="nombre,desc">Nombre descendente</option>
+                            <option value="apellido1,asc">Apellido ascendente</option>
+                            <option value="apellido1,desc">Apellido descendente</option>
+                            <option value="id,asc">ID ascendente</option>
+                            <option value="id,desc">ID descendente</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="page-size">Usuarios por página</label>
+                        <select id="page-size">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button type="button" id="search-users-btn">Buscar</button>
+                        <button type="button" id="clear-filters-btn" class="btn-alt">Limpiar</button>
+                    </div>
+                </div>
+
+                <div class="table-meta">
+                    <span id="users-summary">Cargando usuarios...</span>
+                    <span id="users-order-summary"></span>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Rol</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div id="pagination-controls" class="pagination hidden">
+                    <button type="button" id="prev-page-btn" class="btn-alt">Anterior</button>
+                    <span id="pagination-status" class="pagination-status"></span>
+                    <button type="button" id="next-page-btn" class="btn-alt">Siguiente</button>
+                </div>
+            </section>
+
+            <section id="projects-section" class="section-card hidden">
+                <div class="section-heading">
+                    <h4>Proyectos</h4>
+                    <span id="projects-summary" class="badge">Sin cargar</span>
+                </div>
+                <p id="project-error" class="error-msg hidden"></p>
+
+                <div class="project-layout">
+                    <div>
+                        <div class="table-container" style="margin-top: 0;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Proyecto</th>
+                                        <th>Fecha</th>
+                                        <th>Técnicos</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projects-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <aside class="detail-panel">
+                        <h5>Detalle del proyecto</h5>
+                        <div id="project-detail-empty" style="color: var(--text-muted); font-size: 14px;">
+                            Selecciona un proyecto para ver sus detalles.
+                        </div>
+                        <div id="project-detail-content" class="hidden">
+                            <dl>
+                                <dt>ID</dt>
+                                <dd id="detail-project-id"></dd>
+                                <dt>Nombre</dt>
+                                <dd id="detail-project-name"></dd>
+                                <dt>Fecha</dt>
+                                <dd id="detail-project-date"></dd>
+                                <dt>Descripción</dt>
+                                <dd id="detail-project-description"></dd>
+                            </dl>
+
+                            <h5 style="margin-top: 16px;">Técnicos asignados</h5>
+                            <ul id="detail-project-users" class="detail-list"></ul>
+                        </div>
+                    </aside>
+                </div>
+            </section>
         </div>
     </div>
 
     <script>
+        const API_BASE_URL = 'http://localhost:8080';
+
         let currentUser = null;
+        let usersState = {
+            page: 0,
+            size: 10,
+            sort: 'nombre,asc',
+            nombre: '',
+            apellido1: '',
+            totalPages: 0,
+            totalElements: 0,
+            numberOfElements: 0
+        };
+        let projectsState = {
+            items: [],
+            selectedProjectId: null
+        };
 
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
+        const usersSection = document.getElementById('users-section');
+        const projectsSection = document.getElementById('projects-section');
         const loginForm = document.getElementById('login-form');
         const loginError = document.getElementById('login-error');
         const userError = document.getElementById('user-error');
+        const projectError = document.getElementById('project-error');
         const usersTableBody = document.getElementById('users-table-body');
+        const projectsTableBody = document.getElementById('projects-table-body');
         const userNameEl = document.getElementById('user-name');
         const userRoleEl = document.getElementById('user-role');
         const logoutBtn = document.getElementById('logout-btn');
         const changeMyPasswordBtn = document.getElementById('change-my-password-btn');
-
-        function formatDisplayNameFromEmail(email) {
-            if (!email) return '';
-            const localPart = email.split('@')[0];
-            return localPart
-                .split(/[._-]+/)
-                .filter(Boolean)
-                .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-                .join(' ');
-        }
+        const filterNameInput = document.getElementById('filter-name');
+        const filterLastNameInput = document.getElementById('filter-lastname');
+        const sortUsersSelect = document.getElementById('sort-users');
+        const pageSizeSelect = document.getElementById('page-size');
+        const searchUsersBtn = document.getElementById('search-users-btn');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        const usersSummaryEl = document.getElementById('users-summary');
+        const usersOrderSummaryEl = document.getElementById('users-order-summary');
+        const projectsSummaryEl = document.getElementById('projects-summary');
+        const paginationControls = document.getElementById('pagination-controls');
+        const paginationStatusEl = document.getElementById('pagination-status');
+        const prevPageBtn = document.getElementById('prev-page-btn');
+        const nextPageBtn = document.getElementById('next-page-btn');
+        const projectDetailEmptyEl = document.getElementById('project-detail-empty');
+        const projectDetailContentEl = document.getElementById('project-detail-content');
+        const detailProjectIdEl = document.getElementById('detail-project-id');
+        const detailProjectNameEl = document.getElementById('detail-project-name');
+        const detailProjectDateEl = document.getElementById('detail-project-date');
+        const detailProjectDescriptionEl = document.getElementById('detail-project-description');
+        const detailProjectUsersEl = document.getElementById('detail-project-users');
 
         function normalizeRole(roleName) {
             if (!roleName) return 'Sin rol';
@@ -280,11 +538,12 @@
             if (!user || !Array.isArray(user.roles) || user.roles.length === 0) {
                 return 'Sin rol';
             }
+
             return normalizeRole(user.roles[0]);
         }
 
         function getFullName(user) {
-            return [user.nombre, user.apellido1, user.apellido2]
+            return [user?.nombre, user?.apellido1, user?.apellido2]
                 .filter(value => value && String(value).trim() !== '')
                 .join(' ');
         }
@@ -298,9 +557,129 @@
                 .replaceAll("'", '&#39;');
         }
 
+        function getUsersFromResponse(payload) {
+            if (Array.isArray(payload)) {
+                return payload;
+            }
+
+            if (Array.isArray(payload?.content)) {
+                return payload.content;
+            }
+
+            if (Array.isArray(payload?.items)) {
+                return payload.items;
+            }
+
+            return [];
+        }
+
+        function getPageInfo(payload, users) {
+            if (payload?.page && typeof payload.page === 'object') {
+                return {
+                    page: Number(payload.page.number ?? 0),
+                    size: Number(payload.page.size ?? users.length ?? usersState.size),
+                    totalPages: Number(payload.page.totalPages ?? 0),
+                    totalElements: Number(payload.page.totalElements ?? users.length ?? 0),
+                    numberOfElements: users.length
+                };
+            }
+
+            return {
+                page: Number(payload?.number ?? 0),
+                size: Number(payload?.size ?? users.length ?? usersState.size),
+                totalPages: Number(payload?.totalPages ?? (users.length > 0 ? 1 : 0)),
+                totalElements: Number(payload?.totalElements ?? users.length ?? 0),
+                numberOfElements: Number(payload?.numberOfElements ?? users.length ?? 0)
+            };
+        }
+
+        function isAdmin() {
+            return currentUser?.roles?.some(role => normalizeRole(role) === 'ADMIN') ?? false;
+        }
+
+        function isTecnico() {
+            return currentUser?.roles?.some(role => normalizeRole(role) === 'TECNICO') ?? false;
+        }
+
         function updateHeader() {
-            userNameEl.textContent = currentUser?.name || '';
+            userNameEl.textContent = currentUser ? getFullName(currentUser) || currentUser.email || '' : '';
             userRoleEl.textContent = currentUser?.role || '';
+        }
+
+        function updateSectionsVisibility() {
+            if (isAdmin()) {
+                usersSection.classList.remove('hidden');
+            } else {
+                usersSection.classList.add('hidden');
+            }
+
+            if (isAdmin() || isTecnico()) {
+                projectsSection.classList.remove('hidden');
+            } else {
+                projectsSection.classList.add('hidden');
+            }
+        }
+
+        function updatePagination(pageInfo) {
+            usersState.page = pageInfo.page;
+            usersState.totalPages = pageInfo.totalPages;
+            usersState.totalElements = pageInfo.totalElements;
+            usersState.numberOfElements = pageInfo.numberOfElements;
+
+            const currentPage = pageInfo.totalPages > 0 ? pageInfo.page + 1 : 0;
+            paginationStatusEl.textContent = `Página ${currentPage} de ${pageInfo.totalPages || 0}`;
+            prevPageBtn.disabled = pageInfo.page <= 0;
+            nextPageBtn.disabled = pageInfo.totalPages === 0 || pageInfo.page >= pageInfo.totalPages - 1;
+
+            if (pageInfo.totalPages > 1 && isAdmin()) {
+                paginationControls.classList.remove('hidden');
+            } else {
+                paginationControls.classList.add('hidden');
+            }
+        }
+
+        function updateUsersSummary(users) {
+            if (!Array.isArray(users) || users.length === 0) {
+                usersSummaryEl.textContent = 'No se encontraron usuarios para los filtros seleccionados.';
+                usersOrderSummaryEl.textContent = '';
+                return;
+            }
+
+            const start = usersState.page * usersState.size + 1;
+            const end = start + users.length - 1;
+            usersSummaryEl.textContent = `Mostrando ${start}-${end} de ${usersState.totalElements} usuarios`;
+            usersOrderSummaryEl.textContent = `Orden: ${sortUsersSelect.options[sortUsersSelect.selectedIndex].text}`;
+        }
+
+        function updateProjectsSummary(projects) {
+            const count = Array.isArray(projects) ? projects.length : 0;
+            projectsSummaryEl.textContent = count === 0
+                ? 'Sin proyectos'
+                : `${count} proyecto${count === 1 ? '' : 's'}`;
+        }
+
+        function buildUsersUrl() {
+            const url = new URL(`${API_BASE_URL}/api/users`);
+            url.searchParams.set('page', String(usersState.page));
+            url.searchParams.set('size', String(usersState.size));
+            url.searchParams.set('sort', usersState.sort);
+
+            if (usersState.nombre) {
+                url.searchParams.set('nombre', usersState.nombre);
+            }
+
+            if (usersState.apellido1) {
+                url.searchParams.set('apellido1', usersState.apellido1);
+            }
+
+            return url.toString();
+        }
+
+        function syncStateFromFilters() {
+            usersState.nombre = filterNameInput.value.trim();
+            usersState.apellido1 = filterLastNameInput.value.trim();
+            usersState.sort = sortUsersSelect.value;
+            usersState.size = Number(pageSizeSelect.value) || 10;
         }
 
         function askNewPassword(targetLabel) {
@@ -322,57 +701,74 @@
             return trimmedPassword;
         }
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            loginError.classList.add('hidden');
-            userError.classList.add('hidden');
+        function resetProjectDetail() {
+            projectsState.selectedProjectId = null;
+            projectDetailEmptyEl.classList.remove('hidden');
+            projectDetailContentEl.classList.add('hidden');
+            detailProjectUsersEl.innerHTML = '';
+        }
 
-            const email = document.getElementById('username').value.trim();
-            const clave = document.getElementById('password').value;
-
-            try {
-                const response = await fetch('http://localhost:8080/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ email, clave })
-                });
-
-                const message = await response.text();
-
-                if (!response.ok) {
-                    throw new Error(message || 'Credenciales inválidas');
-                }
-
-                currentUser = {
-                    email,
-                    name: formatDisplayNameFromEmail(email),
-                    role: 'ADMIN'
-                };
-
-                updateHeader();
-
-                loginSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-
-                await fetchUsers();
-
-            } catch (error) {
-                currentUser = null;
-                updateHeader();
-                loginError.textContent = error.message;
-                loginError.classList.remove('hidden');
+        function renderProjectDetail(project) {
+            if (!project) {
+                resetProjectDetail();
+                return;
             }
-        });
+
+            projectsState.selectedProjectId = Number(project.id);
+            detailProjectIdEl.textContent = project.id ?? '';
+            detailProjectNameEl.textContent = project.nombre ?? '';
+            detailProjectDateEl.textContent = project.fechaInicio || 'Sin fecha';
+            detailProjectDescriptionEl.textContent = project.descripcion || 'Sin descripción';
+
+            const tecnicos = Array.isArray(project.tecnicos) ? project.tecnicos : [];
+            detailProjectUsersEl.innerHTML = '';
+
+            if (tecnicos.length === 0) {
+                detailProjectUsersEl.innerHTML = '<li>Sin técnicos asignados.</li>';
+            } else {
+                tecnicos.forEach(tecnico => {
+                    const li = document.createElement('li');
+                    li.textContent = `${getFullName(tecnico)} (${tecnico.email ?? 'sin email'})`;
+                    detailProjectUsersEl.appendChild(li);
+                });
+            }
+
+            projectDetailEmptyEl.classList.add('hidden');
+            projectDetailContentEl.classList.remove('hidden');
+        }
+
+        async function fetchCurrentUser() {
+            const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('No fue posible obtener la sesión actual');
+            }
+
+            const user = await response.json();
+            currentUser = {
+                ...user,
+                name: getFullName(user) || user.email || '',
+                role: getPrimaryRole(user)
+            };
+            updateHeader();
+            updateSectionsVisibility();
+        }
 
         async function fetchUsers() {
+            if (!isAdmin()) {
+                return;
+            }
+
             userError.classList.add('hidden');
             usersTableBody.innerHTML = '';
+            usersSummaryEl.textContent = 'Cargando usuarios...';
+            usersOrderSummaryEl.textContent = '';
 
             try {
-                const response = await fetch('http://localhost:8080/api/users', {
+                const response = await fetch(buildUsersUrl(), {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -381,22 +777,100 @@
                     throw new Error('Error al cargar usuarios');
                 }
 
-                const users = await response.json();
+                const payload = await response.json();
+                const users = getUsersFromResponse(payload);
+                const pageInfo = getPageInfo(payload, users);
 
-                if (currentUser) {
-                    currentUser.role = 'ADMIN';
-                    updateHeader();
-                }
-
-                renderTable(users);
+                updatePagination(pageInfo);
+                updateUsersSummary(users);
+                renderUsersTable(users);
 
             } catch (error) {
                 userError.textContent = error.message;
                 userError.classList.remove('hidden');
+                usersSummaryEl.textContent = 'No fue posible cargar los usuarios.';
+                usersOrderSummaryEl.textContent = '';
+                paginationControls.classList.add('hidden');
             }
         }
 
-        function renderTable(users) {
+        async function fetchProjects(preferredProjectId = projectsState.selectedProjectId) {
+            if (!isAdmin() && !isTecnico()) {
+                return;
+            }
+
+            projectError.classList.add('hidden');
+            projectsTableBody.innerHTML = '';
+            projectsSummaryEl.textContent = 'Cargando...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/projects`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar proyectos');
+                }
+
+                const projects = await response.json();
+                projectsState.items = Array.isArray(projects) ? projects : [];
+                updateProjectsSummary(projectsState.items);
+                renderProjectsTable(projectsState.items);
+
+                if (projectsState.items.length === 0) {
+                    resetProjectDetail();
+                    return;
+                }
+
+                const selectedId = preferredProjectId && projectsState.items.some(project => Number(project.id) === Number(preferredProjectId))
+                    ? preferredProjectId
+                    : projectsState.items[0].id;
+
+                await fetchProjectDetails(selectedId);
+            } catch (error) {
+                projectError.textContent = error.message;
+                projectError.classList.remove('hidden');
+                projectsSummaryEl.textContent = 'No disponible';
+                resetProjectDetail();
+            }
+        }
+
+        async function fetchProjectDetails(projectId) {
+            projectError.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error al cargar el detalle del proyecto');
+                }
+
+                const project = await response.json();
+                renderProjectDetail(project);
+                highlightSelectedProject(project.id);
+            } catch (error) {
+                projectError.textContent = error.message;
+                projectError.classList.remove('hidden');
+                resetProjectDetail();
+            }
+        }
+
+        function highlightSelectedProject(projectId) {
+            const rows = projectsTableBody.querySelectorAll('tr[data-project-id]');
+            rows.forEach(row => {
+                if (Number(row.dataset.projectId) === Number(projectId)) {
+                    row.style.backgroundColor = '#eff6ff';
+                } else {
+                    row.style.backgroundColor = '';
+                }
+            });
+        }
+
+        function renderUsersTable(users) {
             usersTableBody.innerHTML = '';
 
             if (!Array.isArray(users) || users.length === 0) {
@@ -408,6 +882,18 @@
             users.forEach(user => {
                 const fullName = getFullName(user);
                 const role = getPrimaryRole(user);
+                const isTechnicalUser = role === 'TECNICO';
+                const assignButton = isTechnicalUser
+                    ? `
+                        <button
+                            type="button"
+                            class="btn-inline"
+                            onclick="assignUserToProject(${Number(user.id)}, '${escapeHtml(fullName)}')"
+                        >
+                            Asignar proyecto
+                        </button>
+                    `
+                    : '';
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -433,6 +919,7 @@
                             >
                                 Cambiar contraseña
                             </button>
+                            ${assignButton}
                         </div>
                     </td>
                 `;
@@ -440,11 +927,95 @@
             });
         }
 
+        function renderProjectsTable(projects) {
+            projectsTableBody.innerHTML = '';
+
+            if (!Array.isArray(projects) || projects.length === 0) {
+                projectsTableBody.innerHTML =
+                    '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">No hay proyectos disponibles.</td></tr>';
+                return;
+            }
+
+            projects.forEach(project => {
+                const tecnicosCount = Array.isArray(project.tecnicos) ? project.tecnicos.length : 0;
+                const tr = document.createElement('tr');
+                tr.dataset.projectId = String(project.id);
+                tr.innerHTML = `
+                    <td>${escapeHtml(project.id)}</td>
+                    <td>${escapeHtml(project.nombre)}</td>
+                    <td>${escapeHtml(project.fechaInicio || 'Sin fecha')}</td>
+                    <td>${escapeHtml(tecnicosCount)}</td>
+                    <td>
+                        <button
+                            type="button"
+                            class="btn-inline"
+                            onclick="fetchProjectDetails(${Number(project.id)})"
+                        >
+                            Detalles
+                        </button>
+                    </td>
+                `;
+                projectsTableBody.appendChild(tr);
+            });
+
+            highlightSelectedProject(projectsState.selectedProjectId);
+        }
+
+        async function assignUserToProject(userId, userName) {
+            userError.classList.add('hidden');
+
+            if (!isAdmin()) {
+                userError.textContent = 'Solo un administrador puede asignar proyectos.';
+                userError.classList.remove('hidden');
+                return;
+            }
+
+            if (!Array.isArray(projectsState.items) || projectsState.items.length === 0) {
+                userError.textContent = 'No hay proyectos disponibles para asignar.';
+                userError.classList.remove('hidden');
+                return;
+            }
+
+            const options = projectsState.items
+                .map(project => `${project.id}: ${project.nombre}`)
+                .join('\n');
+            const selectedProjectId = prompt(`Selecciona el ID del proyecto para ${userName}:\n${options}`);
+
+            if (selectedProjectId === null) {
+                return;
+            }
+
+            const projectId = Number(selectedProjectId.trim());
+            if (!Number.isInteger(projectId) || !projectsState.items.some(project => Number(project.id) === projectId)) {
+                userError.textContent = 'Debes indicar un ID de proyecto válido.';
+                userError.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tecnicos/${userId}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || 'No fue posible asignar el técnico al proyecto');
+                }
+
+                await fetchProjects(projectId);
+                alert(`Proyecto asignado correctamente a ${userName}`);
+            } catch (error) {
+                userError.textContent = error.message;
+                userError.classList.remove('hidden');
+            }
+        }
+
         async function changeUserRole(userId, roleId) {
             userError.classList.add('hidden');
 
             try {
-                const response = await fetch(`http://localhost:8080/api/users/${userId}/role`, {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/role`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
@@ -461,7 +1032,6 @@
 
                 await fetchUsers();
                 alert('Rol modificado correctamente');
-
             } catch (error) {
                 userError.textContent = error.message;
                 userError.classList.remove('hidden');
@@ -475,7 +1045,7 @@
                 const nuevaClave = askNewPassword(userName);
                 if (!nuevaClave) return;
 
-                const response = await fetch(`http://localhost:8080/api/users/${userId}/password`, {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
@@ -491,7 +1061,6 @@
                 }
 
                 alert(`Contraseña actualizada correctamente para ${userName}`);
-
             } catch (error) {
                 userError.textContent = error.message;
                 userError.classList.remove('hidden');
@@ -500,12 +1069,13 @@
 
         async function changeMyPassword() {
             userError.classList.add('hidden');
+            projectError.classList.add('hidden');
 
             try {
                 const nuevaClave = askNewPassword('tu cuenta');
                 if (!nuevaClave) return;
 
-                const response = await fetch('http://localhost:8080/api/users/me/password', {
+                const response = await fetch(`${API_BASE_URL}/api/users/me/password`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
@@ -521,33 +1091,156 @@
                 }
 
                 alert('Tu contraseña ha sido actualizada correctamente');
-
             } catch (error) {
                 userError.textContent = error.message;
                 userError.classList.remove('hidden');
             }
         }
 
+        function applyFilters() {
+            syncStateFromFilters();
+            usersState.page = 0;
+            fetchUsers();
+        }
+
+        function clearFilters() {
+            filterNameInput.value = '';
+            filterLastNameInput.value = '';
+            sortUsersSelect.value = 'nombre,asc';
+            pageSizeSelect.value = '10';
+            syncStateFromFilters();
+            usersState.page = 0;
+            fetchUsers();
+        }
+
+        async function initializeDashboard() {
+            await fetchCurrentUser();
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+
+            const tasks = [fetchProjects()];
+            if (isAdmin()) {
+                tasks.push(fetchUsers());
+            }
+            await Promise.all(tasks);
+        }
+
+        function resetDashboardState() {
+            currentUser = null;
+            usersState = {
+                page: 0,
+                size: 10,
+                sort: 'nombre,asc',
+                nombre: '',
+                apellido1: '',
+                totalPages: 0,
+                totalElements: 0,
+                numberOfElements: 0
+            };
+            projectsState = {
+                items: [],
+                selectedProjectId: null
+            };
+            updateHeader();
+            updateSectionsVisibility();
+            usersTableBody.innerHTML = '';
+            projectsTableBody.innerHTML = '';
+            usersSummaryEl.textContent = '';
+            usersOrderSummaryEl.textContent = '';
+            projectsSummaryEl.textContent = 'Sin cargar';
+            paginationControls.classList.add('hidden');
+            resetProjectDetail();
+            filterNameInput.value = '';
+            filterLastNameInput.value = '';
+            sortUsersSelect.value = 'nombre,asc';
+            pageSizeSelect.value = '10';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loginError.classList.add('hidden');
+            userError.classList.add('hidden');
+            projectError.classList.add('hidden');
+
+            const email = document.getElementById('username').value.trim();
+            const clave = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ email, clave })
+                });
+
+                const message = await response.text();
+                if (!response.ok) {
+                    throw new Error(message || 'Credenciales inválidas');
+                }
+
+                await initializeDashboard();
+            } catch (error) {
+                resetDashboardState();
+                updateHeader();
+                dashboardSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                loginError.textContent = error.message;
+                loginError.classList.remove('hidden');
+            }
+        });
+
         changeMyPasswordBtn.addEventListener('click', changeMyPassword);
+        searchUsersBtn.addEventListener('click', applyFilters);
+        clearFiltersBtn.addEventListener('click', clearFilters);
+        sortUsersSelect.addEventListener('change', applyFilters);
+        pageSizeSelect.addEventListener('change', applyFilters);
+        filterNameInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                applyFilters();
+            }
+        });
+        filterLastNameInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                applyFilters();
+            }
+        });
+        prevPageBtn.addEventListener('click', () => {
+            if (usersState.page > 0) {
+                usersState.page -= 1;
+                fetchUsers();
+            }
+        });
+        nextPageBtn.addEventListener('click', () => {
+            if (usersState.page < usersState.totalPages - 1) {
+                usersState.page += 1;
+                fetchUsers();
+            }
+        });
 
         logoutBtn.addEventListener('click', async () => {
             try {
-                await fetch('http://localhost:8080/api/auth/logout', {
+                await fetch(`${API_BASE_URL}/api/auth/logout`, {
                     method: 'POST',
                     credentials: 'include'
                 });
             } catch (_) {
             }
 
-            currentUser = null;
-            updateHeader();
-            usersTableBody.innerHTML = '';
+            resetDashboardState();
             loginForm.reset();
             userError.classList.add('hidden');
+            projectError.classList.add('hidden');
             loginError.classList.add('hidden');
             dashboardSection.classList.add('hidden');
             loginSection.classList.remove('hidden');
         });
+
+        window.fetchProjectDetails = fetchProjectDetails;
+        window.changeUserRole = changeUserRole;
+        window.changeUserPassword = changeUserPassword;
+        window.assignUserToProject = assignUserToProject;
     </script>
 </body>
 </html>
