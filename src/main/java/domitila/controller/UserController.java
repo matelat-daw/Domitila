@@ -1,9 +1,12 @@
 package domitila.controller;
 
+import domitila.dto.CreateUserResponseDTO;
 import domitila.dto.RegisterRequestDTO;
 import domitila.dto.UpdateProfileImageRequest;
+import domitila.dto.UpdatePersonalRequestDTO;
 import domitila.dto.UpdateUserPasswordRequestDTO;
 import domitila.dto.UpdateUserRoleRequestDTO;
+import domitila.dto.UpdateUserStatusRequestDTO;
 import domitila.dto.UserSummaryDTO;
 import domitila.entity.Personal;
 import domitila.service.PersonalService;
@@ -30,12 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
     private final PersonalService personalService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UserSummaryDTO>> obtenerUsuarios(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String apellido1,
@@ -46,13 +49,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequestDTO request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CreateUserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         Personal nuevoPersonal = Personal.builder()
                 .nombre(request.nombre())
                 .apellido1(request.apellido1())
                 .apellido2(request.apellido2())
                 .correoElectronico(request.correoElectronico())
-                .clave(request.clave())
                 .telefono(request.telefono())
                 .dni(request.dni())
                 .sexo(request.sexo())
@@ -77,13 +80,17 @@ public class UserController {
                 .idCategoriaProfesional(request.idCategoriaProfesional())
                 .build();
 
-        personalService.registrarPersonal(nuevoPersonal);
+        Personal personalRegistrado = personalService.registrarPersonal(nuevoPersonal);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                        .body("Personal registrado exitosamente en el sistema");
+                        .body(new CreateUserResponseDTO(
+                                personalRegistrado.getId(),
+                                "Personal registrado exitosamente en el sistema"
+                        ));
     }
 
     @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizarRol(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateUserRoleRequestDTO request,
@@ -94,6 +101,7 @@ public class UserController {
     }
 
     @PatchMapping("/me/password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
     public ResponseEntity<String> actualizarMiClave(
             @Valid @RequestBody UpdateUserPasswordRequestDTO request,
             Authentication authentication
@@ -103,6 +111,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/password")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizarClaveUsuario(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateUserPasswordRequestDTO request
@@ -112,13 +121,56 @@ public class UserController {
         return ResponseEntity.ok("Clave actualizada exitosamente");
     }
 
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> actualizarEstadoUsuario(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateUserStatusRequestDTO request
+    ) {
+        personalService.actualizarEstadoPersonal(id, request.activo());
+        return ResponseEntity.ok(Boolean.TRUE.equals(request.activo())
+                ? "Usuario activado exitosamente"
+                : "Usuario desactivado exitosamente");
+    }
+
     @PatchMapping("/{id}")
-    public ResponseEntity<String> actualizar(@PathVariable Integer id, @RequestBody Personal request) {
-        personalService.actualizarPersonal(id, request);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> actualizar(@PathVariable Integer id, @Valid @RequestBody UpdatePersonalRequestDTO request) {
+        Personal datosActualizados = Personal.builder()
+                .nombre(request.nombre())
+                .apellido1(request.apellido1())
+                .apellido2(request.apellido2())
+                .correoElectronico(request.correoElectronico())
+                .telefono(request.telefono())
+                .dni(request.dni())
+                .sexo(request.sexo())
+                .fechaNacimiento(request.fechaNacimiento())
+                .domicilioCompleto(request.domicilioCompleto())
+                .numeroHijos(request.numeroHijos())
+                .tipoJornada(request.tipoJornada())
+                .horasJornadaParcial(request.horasJornadaParcial())
+                .tipoContrato(request.tipoContrato())
+                .grupoProfesional(request.grupoProfesional())
+                .convenioLaboral(request.convenioLaboral())
+                .numeroCuenta(request.numeroCuenta())
+                .discapacidad(request.discapacidad())
+                .fechaAlta(request.fechaAlta())
+                .fechaBaja(request.fechaBaja())
+                .salarioBruto(request.salarioBruto())
+                .titulacion(request.titulacion())
+                .vehiculo(request.vehiculo())
+                .imagenPerfil(request.imagenPerfil())
+                .activo(request.activo())
+                .diasVacaciones(request.diasVacaciones())
+                .idCategoriaProfesional(request.idCategoriaProfesional())
+                .build();
+
+        personalService.actualizarPersonal(id, datosActualizados);
         return ResponseEntity.ok("Personal actualizado exitosamente en el sistema");
     }
 
     @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizarImagenPerfil(
             @PathVariable Integer id,
             @RequestParam("file") MultipartFile file
@@ -128,6 +180,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/profile-image")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizarRutaImagenPerfil(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateProfileImageRequest request

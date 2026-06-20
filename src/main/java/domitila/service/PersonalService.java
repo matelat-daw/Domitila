@@ -70,7 +70,8 @@ public class PersonalService implements UserDetailsService {
         }
 
         aplicarDefaultsPersonal(personal);
-        personal.setClave(passwordEncoder.encode(personal.getClave()));
+        // La clave inicial siempre se genera a partir del DNI ya validado y normalizado.
+        personal.setClave(passwordEncoder.encode(personal.getDni()));
         return personalRepository.save(personal);
     }
 
@@ -278,6 +279,12 @@ public class PersonalService implements UserDetailsService {
         personalRepository.save(personal);
     }
 
+    public void actualizarEstadoPersonal(Integer id, Boolean activo) {
+        Personal personal = obtenerPorId(id);
+        personal.setActivo(Boolean.TRUE.equals(activo));
+        personalRepository.save(personal);
+    }
+
     public String actualizarImagenPerfil(Integer id, MultipartFile file) {
         Personal personal = obtenerPorId(id);
         String imagenAnterior = personal.getImagenPerfil();
@@ -344,6 +351,7 @@ public class PersonalService implements UserDetailsService {
                 personal.getApellido2(),
                 personal.getCorreoElectronico(),
                 personal.getTelefono(),
+                personal.getSexo() == null ? null : personal.getSexo().getDisplayName(),
                 roles,
                 personal.getImagenPerfil(),
                 personal.getActivo()

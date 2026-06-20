@@ -155,6 +155,27 @@
             gap: 15px;
         }
 
+        .header-user {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            background: #f9fafb;
+            flex-shrink: 0;
+        }
+
+        .table-avatar {
+            width: 42px;
+            height: 42px;
+        }
+
         .header-actions {
             display: flex;
             gap: 8px;
@@ -169,6 +190,16 @@
             font-size: 11px;
             text-transform: uppercase;
             font-weight: bold;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .table-container {
@@ -203,6 +234,12 @@
             gap: 8px;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .role-select {
@@ -355,6 +392,42 @@
             gap: 12px;
         }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+        }
+
+        .modal-card h4 {
+            margin-bottom: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 14px;
+        }
+
+        .modal-actions button {
+            width: auto;
+            min-width: 130px;
+        }
+
         @media (max-width: 980px) {
             .project-layout {
                 grid-template-columns: 1fr;
@@ -382,11 +455,14 @@
 
     <div id="dashboard-section" class="card w-dashboard hidden">
         <div class="header-panel">
-            <div>
-                <h3>¡Bienvenido/a, <span id="user-name" style="color: var(--primary);"></span>!</h3>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-                    Rol: <span id="user-role" class="badge"></span>
-                </p>
+            <div class="header-user">
+                <img id="current-user-avatar" class="profile-avatar" src="" alt="Imagen de perfil">
+                <div>
+                    <h3>¡Bienvenido/a, <span id="user-name" style="color: var(--primary);"></span>!</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                        Rol: <span id="user-role" class="badge"></span>
+                    </p>
+                </div>
             </div>
 
             <div class="header-actions">
@@ -430,10 +506,6 @@
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-telefono">Tel&eacute;fono</label>
                                 <input type="text" id="create-user-telefono" required>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label for="create-user-clave">Contraseña</label>
-                                <input type="password" id="create-user-clave" minlength="6" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-sexo">Sexo</label>
@@ -532,6 +604,17 @@
                                     <span>Dispone de vehículo</span>
                                 </div>
                             </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Usuario activo</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="create-user-activo" checked>
+                                    <span>Permitir acceso a la aplicación</span>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="create-user-imagen-perfil">Imagen de perfil</label>
+                                <input type="file" id="create-user-imagen-perfil" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp">
+                            </div>
                             <div class="form-group" style="margin-bottom: 0; grid-column: 1 / -1;">
                                 <label for="create-user-domicilio-completo">Domicilio completo</label>
                                 <textarea id="create-user-domicilio-completo" maxlength="255"></textarea>
@@ -590,10 +673,12 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Perfil</th>
                                 <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Teléfono</th>
                                 <th>Rol</th>
+                                <th>Estado</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -659,6 +744,27 @@
         </div>
     </div>
 
+    <div id="password-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h4 id="password-modal-title">Cambiar contraseña</h4>
+            <form id="password-modal-form">
+                <div class="form-group">
+                    <label for="password-modal-first">Nueva contraseña</label>
+                    <input type="password" id="password-modal-first" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="password-modal-second">Confirmar contraseña</label>
+                    <input type="password" id="password-modal-second" minlength="6" required>
+                </div>
+                <p id="password-modal-error" class="error-msg hidden"></p>
+                <div class="modal-actions">
+                    <button type="button" id="password-modal-cancel" class="btn-alt">Cancelar</button>
+                    <button type="submit" id="password-modal-submit">Guardar contraseña</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const API_BASE_URL = 'http://localhost:8080';
 
@@ -677,6 +783,11 @@
             items: [],
             selectedProjectId: null
         };
+        let passwordChangeState = {
+            userId: null,
+            targetLabel: '',
+            mode: null
+        };
 
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
@@ -690,6 +801,7 @@
         const projectsTableBody = document.getElementById('projects-table-body');
         const userNameEl = document.getElementById('user-name');
         const userRoleEl = document.getElementById('user-role');
+        const currentUserAvatarEl = document.getElementById('current-user-avatar');
         const logoutBtn = document.getElementById('logout-btn');
         const changeMyPasswordBtn = document.getElementById('change-my-password-btn');
         const openCreateUserBtn = document.getElementById('open-create-user-btn');
@@ -705,7 +817,6 @@
         const createUserCorreoElectronico = document.getElementById('create-user-correo-electronico');
         const createUserDni = document.getElementById('create-user-dni');
         const createUserTelefono = document.getElementById('create-user-telefono');
-        const createUserClave = document.getElementById('create-user-clave');
         const createUserSexo = document.getElementById('create-user-sexo');
         const createUserFechaNacimiento = document.getElementById('create-user-fecha-nacimiento');
         const createUserDomicilioCompleto = document.getElementById('create-user-domicilio-completo');
@@ -722,6 +833,8 @@
         const createUserSalarioBruto = document.getElementById('create-user-salario-bruto');
         const createUserTitulacion = document.getElementById('create-user-titulacion');
         const createUserVehiculo = document.getElementById('create-user-vehiculo');
+        const createUserActivo = document.getElementById('create-user-activo');
+        const createUserImagenPerfil = document.getElementById('create-user-imagen-perfil');
         const createUserDiasVacaciones = document.getElementById('create-user-dias-vacaciones');
         const createUserIdCategoriaProfesional = document.getElementById('create-user-id-categoria-profesional');
         const filterNameInput = document.getElementById('filter-name');
@@ -744,6 +857,14 @@
         const detailProjectDateEl = document.getElementById('detail-project-date');
         const detailProjectDescriptionEl = document.getElementById('detail-project-description');
         const detailProjectUsersEl = document.getElementById('detail-project-users');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordModalForm = document.getElementById('password-modal-form');
+        const passwordModalTitle = document.getElementById('password-modal-title');
+        const passwordModalFirstInput = document.getElementById('password-modal-first');
+        const passwordModalSecondInput = document.getElementById('password-modal-second');
+        const passwordModalError = document.getElementById('password-modal-error');
+        const passwordModalCancelBtn = document.getElementById('password-modal-cancel');
+        const passwordModalSubmitBtn = document.getElementById('password-modal-submit');
 
         function normalizeRole(roleName) {
             if (!roleName) return 'Sin rol';
@@ -782,6 +903,14 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
+        }
+
+        function normalizeText(value) {
+            return String(value ?? '')
+                .trim()
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
         }
 
         function getNullableString(value) {
@@ -853,9 +982,28 @@
             return hasRole(currentUser, 'TECNICO');
         }
 
+        function getDefaultProfileImagePathBySexo(sexo) {
+            const normalizedSexo = normalizeText(sexo);
+            if (normalizedSexo.includes('mujer')) {
+                return 'default/female.png';
+            }
+            if (normalizedSexo.includes('varon') || normalizedSexo.includes('hombre')) {
+                return 'default/male.png';
+            }
+            return 'default/nobinary.png';
+        }
+
+        function getProfileImageUrl(user) {
+            const imagePath = getNullableString(user?.imagenPerfil);
+            const relativePath = imagePath || getDefaultProfileImagePathBySexo(user?.sexo);
+            return `${API_BASE_URL}/api/images/${relativePath}`;
+        }
+
         function updateHeader() {
             userNameEl.textContent = currentUser ? getFullName(currentUser) || currentUser.correoElectronico || '' : '';
             userRoleEl.textContent = currentUser ? getRolesLabel(currentUser) : '';
+            currentUserAvatarEl.src = currentUser ? getProfileImageUrl(currentUser) : `${API_BASE_URL}/api/images/default/nobinary.png`;
+            currentUserAvatarEl.alt = currentUser ? `Imagen de perfil de ${getFullName(currentUser) || currentUser.correoElectronico}` : 'Imagen de perfil';
         }
 
         function updateSectionsVisibility() {
@@ -935,32 +1083,71 @@
             usersState.size = Number(pageSizeSelect.value) || 10;
         }
 
-        function askNewPassword(targetLabel) {
-            const nuevaClave = prompt(`Introduce la nueva contraseña para ${targetLabel}:`);
-            if (nuevaClave === null) return null;
-
-            const trimmedPassword = nuevaClave.trim();
-            if (trimmedPassword.length < 6) {
-                throw new Error('La nueva contraseña debe tener al menos 6 caracteres');
-            }
-
-            const confirmacion = prompt(`Confirma la nueva contraseña para ${targetLabel}:`);
-            if (confirmacion === null) return null;
-
-            if (trimmedPassword !== confirmacion.trim()) {
-                throw new Error('Las contraseñas no coinciden');
-            }
-
-            return trimmedPassword;
-        }
-
         function resetCreateUserForm() {
             createUserForm.reset();
+            createUserActivo.checked = true;
             createUserError.classList.add('hidden');
             createUserError.textContent = '';
             createUserSuccess.classList.add('hidden');
             createUserSuccess.textContent = '';
             submitCreateUserBtn.disabled = false;
+        }
+
+        function resetPasswordModal() {
+            passwordModalForm.reset();
+            passwordModalError.textContent = '';
+            passwordModalError.classList.add('hidden');
+            passwordModalSubmitBtn.disabled = false;
+        }
+
+        function closePasswordModal() {
+            passwordChangeState = {
+                userId: null,
+                targetLabel: '',
+                mode: null
+            };
+            passwordModal.classList.add('hidden');
+            resetPasswordModal();
+        }
+
+        function openPasswordModal(mode, targetLabel, userId = null) {
+            passwordChangeState = {
+                userId,
+                targetLabel,
+                mode
+            };
+            resetPasswordModal();
+            passwordModalTitle.textContent = mode === 'self'
+                ? 'Cambiar mi contraseña'
+                : `Cambiar contraseña de ${targetLabel}`;
+            passwordModal.classList.remove('hidden');
+            passwordModalFirstInput.focus();
+        }
+
+        async function parseResponseBody(response) {
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                return response.json();
+            }
+            return response.text();
+        }
+
+        async function uploadUserProfileImage(userId, file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch(`${API_BASE_URL}/api/users/${userId}/profile-image`, {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const body = await parseResponseBody(response);
+            if (!response.ok) {
+                throw new Error(typeof body === 'string' ? body : 'No fue posible subir la imagen de perfil');
+            }
+
+            return typeof body === 'string' ? body : null;
         }
 
         function toggleCreateUserPanel(visible) {
@@ -1151,13 +1338,14 @@
 
             if (!Array.isArray(users) || users.length === 0) {
                 usersTableBody.innerHTML =
-                    '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">No hay más usuarios</td></tr>';
+                    '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No hay más usuarios</td></tr>';
                 return;
             }
 
             users.forEach(user => {
                 const fullName = getFullName(user);
                 const role = getRolesLabel(user);
+                const active = Boolean(user.activo);
                 const isTechnicalUser = hasRole(user, 'TECNICO');
                 const assignButton = isTechnicalUser
                     ? `
@@ -1174,12 +1362,28 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${escapeHtml(user.id)}</td>
-                    <td>${escapeHtml(fullName)}</td>
+                    <td>
+                        <img
+                            class="profile-avatar table-avatar"
+                            src="${escapeHtml(getProfileImageUrl(user))}"
+                            alt="Perfil de ${escapeHtml(fullName || user.correoElectronico || 'usuario')}"
+                        >
+                    </td>
+                    <td>
+                        <div class="name-cell">
+                            <span>${escapeHtml(fullName)}</span>
+                        </div>
+                    </td>
                     <td>${escapeHtml(user.correoElectronico || 'Sin correo')}</td>
                     <td>${escapeHtml(user.telefono || 'Sin teléfono')}</td>
                     <td>
                         <span class="badge" style="background:#dbeafe; color:#1e40af;">
                             ${escapeHtml(role)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${active ? 'status-active' : 'status-inactive'}">
+                            ${active ? 'Activo' : 'Inactivo'}
                         </span>
                     </td>
                     <td>
@@ -1312,7 +1516,6 @@
                 correoElectronico: createUserCorreoElectronico.value.trim(),
                 dni: createUserDni.value.trim(),
                 telefono: createUserTelefono.value.trim(),
-                clave: createUserClave.value,
                 sexo: getNullableString(createUserSexo.value),
                 fechaNacimiento: getNullableString(createUserFechaNacimiento.value),
                 domicilioCompleto: getNullableString(createUserDomicilioCompleto.value),
@@ -1329,9 +1532,15 @@
                 salarioBruto: getNullableDecimal(createUserSalarioBruto.value),
                 titulacion: getNullableString(createUserTitulacion.value),
                 vehiculo: createUserVehiculo.checked,
+                imagenPerfil: null,
+                activo: createUserActivo.checked,
                 diasVacaciones: getNullableInteger(createUserDiasVacaciones.value),
                 idCategoriaProfesional: getNullableInteger(createUserIdCategoriaProfesional.value)
             };
+
+            const selectedProfileImage = createUserImagenPerfil.files && createUserImagenPerfil.files.length > 0
+                ? createUserImagenPerfil.files[0]
+                : null;
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/users`, {
@@ -1343,16 +1552,40 @@
                     body: JSON.stringify(payload)
                 });
 
-                const message = await response.text();
+                const body = await parseResponseBody(response);
                 if (!response.ok) {
-                    throw new Error(message || 'No fue posible crear el trabajador');
+                    throw new Error(typeof body === 'string' ? body : body?.message || 'No fue posible crear el trabajador');
+                }
+
+                const userId = typeof body === 'object' && body !== null ? body.id : null;
+                const message = typeof body === 'object' && body !== null ? body.message : body;
+
+                if (selectedProfileImage) {
+                    if (!userId) {
+                        throw new Error('El usuario se creó, pero la API no devolvió el ID necesario para subir la imagen.');
+                    }
+                    try {
+                        await uploadUserProfileImage(userId, selectedProfileImage);
+                    } catch (uploadError) {
+                        await fetchUsers();
+                        createUserSuccess.textContent = `${message || 'Usuario creado correctamente.'} La imagen no se pudo subir: ${uploadError.message}`;
+                        createUserSuccess.classList.remove('hidden');
+                        createUserError.classList.add('hidden');
+                        createUserForm.reset();
+                        createUserActivo.checked = true;
+                        return;
+                    }
                 }
 
                 createUserSuccess.textContent = message || 'Usuario creado correctamente.';
                 createUserSuccess.classList.remove('hidden');
                 createUserError.classList.add('hidden');
                 createUserForm.reset();
+                createUserActivo.checked = true;
                 await fetchUsers();
+                if (currentUser && Number(currentUser.id) === Number(userId)) {
+                    await fetchCurrentUser();
+                }
             } catch (error) {
                 createUserError.textContent = error.message;
                 createUserError.classList.remove('hidden');
@@ -1393,14 +1626,43 @@
             }
         }
 
-        async function changeUserPassword(userId, userName) {
+        function changeUserPassword(userId, userName) {
             userError.classList.add('hidden');
+            openPasswordModal('admin', userName, userId);
+        }
+
+        function changeMyPassword() {
+            userError.classList.add('hidden');
+            projectError.classList.add('hidden');
+            openPasswordModal('self', 'tu cuenta');
+        }
+
+        async function submitPasswordChange(event) {
+            event.preventDefault();
+
+            const nuevaClave = passwordModalFirstInput.value.trim();
+            const confirmacion = passwordModalSecondInput.value.trim();
+            const currentMode = passwordChangeState.mode;
+            const currentTargetLabel = passwordChangeState.targetLabel;
+
+            passwordModalError.classList.add('hidden');
+            passwordModalError.textContent = '';
+            passwordModalSubmitBtn.disabled = true;
 
             try {
-                const nuevaClave = askNewPassword(userName);
-                if (!nuevaClave) return;
+                if (nuevaClave.length < 6) {
+                    throw new Error('La nueva contraseña debe tener al menos 6 caracteres');
+                }
 
-                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/password`, {
+                if (nuevaClave !== confirmacion) {
+                    throw new Error('Las contraseñas no coinciden');
+                }
+
+                const endpoint = passwordChangeState.mode === 'self'
+                    ? `${API_BASE_URL}/api/users/me/password`
+                    : `${API_BASE_URL}/api/users/${passwordChangeState.userId}/password`;
+
+                const response = await fetch(endpoint, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1410,45 +1672,19 @@
                 });
 
                 const message = await response.text();
-
                 if (!response.ok) {
                     throw new Error(message || 'Error al actualizar la contraseña');
                 }
 
-                alert(`Contraseña actualizada correctamente para ${userName}`);
+                closePasswordModal();
+                alert(currentMode === 'self'
+                    ? 'Tu contraseña ha sido actualizada correctamente'
+                    : (message || `Contraseña actualizada correctamente para ${currentTargetLabel}`));
             } catch (error) {
-                userError.textContent = error.message;
-                userError.classList.remove('hidden');
-            }
-        }
-
-        async function changeMyPassword() {
-            userError.classList.add('hidden');
-            projectError.classList.add('hidden');
-
-            try {
-                const nuevaClave = askNewPassword('tu cuenta');
-                if (!nuevaClave) return;
-
-                const response = await fetch(`${API_BASE_URL}/api/users/me/password`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ nuevaClave })
-                });
-
-                const message = await response.text();
-
-                if (!response.ok) {
-                    throw new Error(message || 'Error al actualizar tu contraseña');
-                }
-
-                alert('Tu contraseña ha sido actualizada correctamente');
-            } catch (error) {
-                userError.textContent = error.message;
-                userError.classList.remove('hidden');
+                passwordModalError.textContent = error.message;
+                passwordModalError.classList.remove('hidden');
+            } finally {
+                passwordModalSubmitBtn.disabled = false;
             }
         }
 
@@ -1504,6 +1740,7 @@
             usersOrderSummaryEl.textContent = '';
             projectsSummaryEl.textContent = 'Sin cargar';
             paginationControls.classList.add('hidden');
+            currentUserAvatarEl.src = `${API_BASE_URL}/api/images/default/nobinary.png`;
             resetProjectDetail();
             filterNameInput.value = '';
             filterLastNameInput.value = '';
@@ -1549,6 +1786,8 @@
         changeMyPasswordBtn.addEventListener('click', changeMyPassword);
         openCreateUserBtn.addEventListener('click', () => toggleCreateUserPanel(true));
         cancelCreateUserBtn.addEventListener('click', () => toggleCreateUserPanel(false));
+        passwordModalCancelBtn.addEventListener('click', closePasswordModal);
+        passwordModalForm.addEventListener('submit', submitPasswordChange);
         createUserForm.addEventListener('submit', createUser);
         searchUsersBtn.addEventListener('click', applyFilters);
         clearFiltersBtn.addEventListener('click', clearFilters);
@@ -1592,6 +1831,7 @@
             projectError.classList.add('hidden');
             loginError.classList.add('hidden');
             resetCreateUserForm();
+            closePasswordModal();
             dashboardSection.classList.add('hidden');
             loginSection.classList.remove('hidden');
         });

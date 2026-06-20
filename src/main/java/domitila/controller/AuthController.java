@@ -156,6 +156,12 @@ public class AuthController {
         return hasAuthority(userDetails, "ROLE_ADMIN") || hasAuthority(userDetails, "ROLE_TECNICO");
     }
 
+    private String buildLoginDeniedMessage(UserDetails userDetails) {
+        return (hasAuthority(userDetails, "ROLE_USUARIO") || hasAuthority(userDetails, "ROLE_USER"))
+                ? "Los usuarios con rol USUARIO no tienen permiso para loguearse."
+                : "No tienes permiso para loguearte. Si piensas que es un error, contacta con la Administradora.";
+    }
+
     private boolean hasAuthority(UserDetails userDetails, String authority) {
         return userDetails.getAuthorities().stream()
                 .anyMatch(a -> authority.equalsIgnoreCase(a.getAuthority()));
@@ -165,6 +171,13 @@ public class AuthController {
         try {
             String username = jwtService.extractUsername(refreshToken);
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (!userDetails.isEnabled()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "La cuenta está desactivada.");
+            }
+            if (!canLogin(userDetails)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, buildLoginDeniedMessage(userDetails));
+            }
 
             if (!jwtService.isRefreshTokenValid(refreshToken, userDetails)) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Refresh Token inválido o expirado");
