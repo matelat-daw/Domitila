@@ -147,40 +147,6 @@ public class Personal {
     @Builder.Default
     private Set<RoleName> roles = new HashSet<>();
 
-    public RoleName getRole() {
-        if (roles == null || roles.isEmpty()) {
-            return null;
-        }
-        return roles.iterator().next();
-    }
-
-    // La tabla intermedia persiste una colección de roles, pero la lógica actual de la app
-    // trabaja con un único rol por usuario desde el servicio y la seguridad.
-    public void setRole(RoleName role) {
-        if (role == null) {
-            this.roles = new HashSet<>();
-            return;
-        }
-        this.roles = new HashSet<>(Set.of(role));
-    }
-
-    public void addRole(RoleName role) {
-        if (role == null) {
-            return;
-        }
-        if (this.roles == null) {
-            this.roles = new HashSet<>();
-        }
-        this.roles.add(role);
-    }
-
-    public void removeRole(RoleName role) {
-        if (role == null || this.roles == null) {
-            return;
-        }
-        this.roles.remove(role);
-    }
-
 //     @ManyToMany(fetch = FetchType.LAZY)
 //     @JoinTable(
 //             name = "personal_laboral_proyecto",
