@@ -3,6 +3,7 @@ package domitila.service;
 import domitila.dto.UserSummaryDTO;
 import domitila.entity.RoleName;
 import domitila.entity.Personal;
+import domitila.entity.Sexo;
 import domitila.repository.PersonalRepository;
 import domitila.security.PersonalDetails;
 import domitila.util.DocumentoIdentidadUtil;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Set;
 
@@ -26,6 +28,7 @@ public class PersonalService implements UserDetailsService {
 
     private final PersonalRepository personalRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
     // Método obligatorio para Spring Security
     @Override
@@ -45,7 +48,6 @@ public class PersonalService implements UserDetailsService {
         personal.setCorreoElectronico(normalizarTexto(personal.getCorreoElectronico()));
         personal.setTelefono(normalizarTextoOpcional(personal.getTelefono()));
         personal.setDni(normalizarDocumentoIdentidad(personal.getDni()));
-        personal.setSexo(normalizarTextoOpcional(personal.getSexo()));
         personal.setDomicilioCompleto(normalizarTextoOpcional(personal.getDomicilioCompleto()));
         personal.setTipoJornada(normalizarTextoOpcional(personal.getTipoJornada()));
         personal.setTipoContrato(normalizarTextoOpcional(personal.getTipoContrato()));
@@ -53,6 +55,7 @@ public class PersonalService implements UserDetailsService {
         personal.setConvenioLaboral(normalizarTextoOpcional(personal.getConvenioLaboral()));
         personal.setNumeroCuenta(normalizarTextoOpcional(personal.getNumeroCuenta()));
         personal.setTitulacion(normalizarTextoOpcional(personal.getTitulacion()));
+        personal.setImagenPerfil(normalizarRutaImagenPerfil(personal.getImagenPerfil()));
 
         validarDniObligatorio(personal.getDni());
 
@@ -147,8 +150,8 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setDni(dniActualizado);
         }
 
-        String sexoActualizado = normalizarTextoOpcional(datosActualizados.getSexo());
-        if (sexoActualizado != null && !sexoActualizado.isBlank()) {
+        Sexo sexoActualizado = datosActualizados.getSexo();
+        if (sexoActualizado != null) {
             personalExistente.setSexo(sexoActualizado);
         }
 
@@ -215,6 +218,14 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setVehiculo(datosActualizados.getVehiculo());
         }
 
+        if (datosActualizados.getImagenPerfil() != null) {
+            personalExistente.setImagenPerfil(normalizarRutaImagenPerfil(datosActualizados.getImagenPerfil()));
+        }
+
+        if (datosActualizados.getActivo() != null) {
+            personalExistente.setActivo(datosActualizados.getActivo());
+        }
+
         if (datosActualizados.getDiasVacaciones() != null) {
             personalExistente.setDiasVacaciones(datosActualizados.getDiasVacaciones());
         }
@@ -234,6 +245,7 @@ public class PersonalService implements UserDetailsService {
     // Eliminar
     public void eliminarPersonal(Integer id) {
         Personal personal = obtenerPorId(id);
+        imageService.deleteImage(personal.getImagenPerfil());
         personalRepository.delete(personal);
     }
 
@@ -263,6 +275,28 @@ public class PersonalService implements UserDetailsService {
         Personal personal = obtenerPorId(id);
         personal.setClave(passwordEncoder.encode(nuevaClave));
         personalRepository.save(personal);
+    }
+
+    public String actualizarImagenPerfil(Integer id, MultipartFile file) {
+        Personal personal = obtenerPorId(id);
+        String imagenAnterior = personal.getImagenPerfil();
+        String nuevaRuta = imageService.saveProfileImage(file, id);
+
+        if (imagenAnterior != null && !imagenAnterior.equals(nuevaRuta)) {
+            imageService.deleteImage(imagenAnterior);
+        }
+
+        personal.setImagenPerfil(nuevaRuta);
+        personalRepository.save(personal);
+        return nuevaRuta;
+    }
+
+    public String actualizarRutaImagenPerfil(Integer id, String imagenPerfil) {
+        Personal personal = obtenerPorId(id);
+        String rutaNormalizada = normalizarRutaImagenPerfil(imagenPerfil);
+        personal.setImagenPerfil(rutaNormalizada);
+        personalRepository.save(personal);
+        return rutaNormalizada;
     }
 
     public void actualizarMiClave(String correoElectronicoLogueado, String nuevaClave) {
@@ -309,7 +343,9 @@ public class PersonalService implements UserDetailsService {
                 personal.getApellido2(),
                 personal.getCorreoElectronico(),
                 personal.getTelefono(),
-                roles
+                roles,
+                personal.getImagenPerfil(),
+                personal.getActivo()
         );
     }
 
@@ -337,7 +373,7 @@ public class PersonalService implements UserDetailsService {
 
     private void aplicarDefaultsPersonal(Personal personal) {
         if (personal.getSexo() == null) {
-            personal.setSexo("No binario");
+            personal.setSexo(Sexo.NO_BINARIO);
         }
         if (personal.getNumeroHijos() == null) {
             personal.setNumeroHijos(0);
@@ -356,6 +392,9 @@ public class PersonalService implements UserDetailsService {
         }
         if (personal.getVehiculo() == null) {
             personal.setVehiculo(false);
+        }
+        if (personal.getActivo() == null) {
+            personal.setActivo(true);
         }
         if (personal.getIdCategoriaProfesional() == null) {
             personal.setIdCategoriaProfesional(1);
@@ -382,6 +421,20 @@ public class PersonalService implements UserDetailsService {
         }
 
         return normalizado.toUpperCase().replaceAll("[-\\s]", "");
+    }
+
+    private String normalizarRutaImagenPerfil(String valor) {
+        String normalizado = normalizarTextoOpcional(valor);
+        if (normalizado == null) {
+            return null;
+        }
+
+        String rutaNormalizada = normalizado.replace("\\", "/").replaceAll("/{2,}", "/");
+        if (!imageService.isValidImagePath(rutaNormalizada)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La ruta de la imagen de perfil no es válida.");
+        }
+
+        return rutaNormalizada;
     }
 
     private void validarDniObligatorio(String dni) {

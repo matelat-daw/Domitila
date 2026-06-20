@@ -1,5 +1,6 @@
 package domitila.dto;
 
+import domitila.entity.Sexo;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -33,7 +34,7 @@ public record RegisterRequestDTO (
     @Size(max = 15, message = "El DNI no puede tener más de 15 caracteres")
     String dni,
 
-    String sexo,
+    Sexo sexo,
 
     LocalDate fechaNacimiento,
 
@@ -67,6 +68,11 @@ public record RegisterRequestDTO (
     String titulacion,
 
     Boolean vehiculo,
+
+    @Size(max = 255, message = "La ruta de la imagen de perfil no puede tener más de 255 caracteres")
+    String imagenPerfil,
+
+    Boolean activo,
 
     Integer diasVacaciones,
 

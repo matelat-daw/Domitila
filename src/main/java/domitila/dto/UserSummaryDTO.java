@@ -9,5 +9,7 @@ public record UserSummaryDTO (
     String apellido2,
     String correoElectronico,
     String telefono,
-    Set<String> roles
+    Set<String> roles,
+    String imagenPerfil,
+    Boolean activo
 ) {}

@@ -44,9 +44,10 @@ public class Personal {
     @Builder.Default
     private String dni = "PENDIENTE";
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "sexo", nullable = false, length = 16)
     @Builder.Default
-    private String sexo = "No binario";
+    private Sexo sexo = Sexo.NO_BINARIO;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
@@ -107,6 +108,13 @@ public class Personal {
     @Column(name = "vehiculo", nullable = false)
     @Builder.Default
     private Boolean vehiculo = false;
+
+    @Column(name = "imagen_perfil", length = 255)
+    private String imagenPerfil;
+
+    @Column(name = "activo", nullable = false)
+    @Builder.Default
+    private Boolean activo = true;
 
     @Column(name = "dias_vacaciones")
     private Integer diasVacaciones;

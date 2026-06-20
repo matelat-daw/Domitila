@@ -24,9 +24,12 @@ public class JwtService {
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
-    // 2. Tiempo de expiración inyectado (ej: 86400000 para 24 horas)
+    // 2. Tiempo de expiración del access token en milisegundos
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+
+    @Value("${security.jwt.refresh-expiration-time}")
+    private long refreshTokenExpiration;
 
     // Agrega estas dos variables arriba en tu clase JwtService
     @Value("${security.jwt.issuer}")
@@ -108,15 +111,13 @@ public class JwtService {
         return signingKey;
     }
 
-    // 1. Generar el Refresh Token (Estilo Moderno)
+    // 1. Generar el Refresh Token
     public String generateRefreshToken(UserDetails userDetails) {
-        long sieteDiasEnMilisegundos = 1000L * 60 * 60 * 24 * 7;
-        
         return Jwts.builder()
-                .subject(userDetails.getUsername()) // 👈 Antes: setSubject
-                .issuedAt(new Date(System.currentTimeMillis())) // 👈 Antes: setIssuedAt
-                .expiration(new Date(System.currentTimeMillis() + sieteDiasEnMilisegundos)) // 👈 Antes: setExpiration
-                .signWith(getSignInKey(), Jwts.SIG.HS256) // 👈 Antes: SignatureAlgorithm.HS256
+                .subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .signWith(getSignInKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
@@ -135,5 +136,13 @@ public class JwtService {
     // 2. Extrae la fecha de expiración específica del token
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    public long getAccessTokenExpiration() {
+        return jwtExpiration;
+    }
+
+    public long getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
     }
 }

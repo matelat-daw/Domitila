@@ -21,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -71,21 +72,29 @@ public class AuthController {
                         .body(errorMsg);
             }
 
-            // Generar ambos tokens
             String accessToken = jwtService.generateToken(userDetails);
-            String refreshToken = jwtService.generateRefreshToken(userDetails); // 👈 ¡Nuevo!
+            String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-            // Crear ambas cookies con sus respectivos tiempos de vida
-            ResponseCookie accessTokenCookie = buildCookie(JWT_COOKIE_NAME, accessToken, Duration.ofMinutes(15));
-            ResponseCookie refreshTokenCookie = buildCookie(REFRESH_COOKIE_NAME, refreshToken, Duration.ofDays(7)); // 👈 ¡Nuevo!
+            ResponseCookie accessTokenCookie = buildCookie(
+                    JWT_COOKIE_NAME,
+                    accessToken,
+                    Duration.ofMillis(jwtService.getAccessTokenExpiration())
+            );
+            ResponseCookie refreshTokenCookie = buildCookie(
+                    REFRESH_COOKIE_NAME,
+                    refreshToken,
+                    Duration.ofMillis(jwtService.getRefreshTokenExpiration())
+            );
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString()) // 👈 Adjuntamos ambas
+                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                     .body("Login exitoso. Cookies establecidas.");
 
         } catch (AuthenticationCredentialsNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales invalidas.");
+        } catch (DisabledException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("La cuenta está desactivada.");
         } catch (org.springframework.security.core.AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Correo electrónico o clave incorrectos.");
         }
@@ -103,7 +112,11 @@ public class AuthController {
         String refreshToken = refreshCookie.getValue();
         UserDetails userDetails = validateRefreshToken(refreshToken);
         String newAccessToken = jwtService.generateToken(userDetails);
-        ResponseCookie accessTokenCookie = buildCookie(JWT_COOKIE_NAME, newAccessToken, Duration.ofMinutes(15));
+        ResponseCookie accessTokenCookie = buildCookie(
+                JWT_COOKIE_NAME,
+                newAccessToken,
+                Duration.ofMillis(jwtService.getAccessTokenExpiration())
+        );
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())

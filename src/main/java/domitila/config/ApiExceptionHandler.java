@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
@@ -48,6 +49,9 @@ public class ApiExceptionHandler {
         if (normalized.contains("bigdecimal") || normalized.contains("double") || normalized.contains("float")) {
             return ResponseEntity.badRequest().body("Hay un campo numérico con un valor inválido.");
         }
+        if (normalized.contains("sexo")) {
+            return ResponseEntity.badRequest().body("El sexo es inválido. Usa Hombre, Mujer o No binario.");
+        }
 
         return ResponseEntity.badRequest().body("La solicitud contiene datos con formato incorrecto.");
     }
@@ -79,6 +83,11 @@ public class ApiExceptionHandler {
         String message = resolveConflictMessage(rawMessage);
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.badRequest().body("La imagen supera el tamaño máximo permitido de 5 MB.");
     }
 
     @ExceptionHandler(Exception.class)
