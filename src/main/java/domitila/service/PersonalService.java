@@ -1,9 +1,13 @@
 package domitila.service;
 
 import domitila.dto.UserSummaryDTO;
-import domitila.entity.RoleName;
 import domitila.entity.Personal;
-import domitila.entity.Sexo;
+import domitila.enums.ConvenioLaboral;
+import domitila.enums.GrupoProfesional;
+import domitila.enums.RoleName;
+import domitila.enums.Sexo;
+import domitila.enums.TipoContrato;
+import domitila.enums.TipoJornada;
 import domitila.repository.PersonalRepository;
 import domitila.security.PersonalDetails;
 import domitila.util.DocumentoIdentidadUtil;
@@ -49,10 +53,6 @@ public class PersonalService implements UserDetailsService {
         personal.setTelefono(normalizarTextoOpcional(personal.getTelefono()));
         personal.setDni(normalizarDocumentoIdentidad(personal.getDni()));
         personal.setDomicilioCompleto(normalizarTextoOpcional(personal.getDomicilioCompleto()));
-        personal.setTipoJornada(normalizarTextoOpcional(personal.getTipoJornada()));
-        personal.setTipoContrato(normalizarTextoOpcional(personal.getTipoContrato()));
-        personal.setGrupoProfesional(normalizarTextoOpcional(personal.getGrupoProfesional()));
-        personal.setConvenioLaboral(normalizarTextoOpcional(personal.getConvenioLaboral()));
         personal.setNumeroCuenta(normalizarTextoOpcional(personal.getNumeroCuenta()));
         personal.setTitulacion(normalizarTextoOpcional(personal.getTitulacion()));
         personal.setImagenPerfil(normalizarRutaImagenPerfil(personal.getImagenPerfil()));
@@ -167,8 +167,8 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setNumeroHijos(datosActualizados.getNumeroHijos());
         }
 
-        String tipoJornadaActualizado = normalizarTextoOpcional(datosActualizados.getTipoJornada());
-        if (tipoJornadaActualizado != null && !tipoJornadaActualizado.isBlank()) {
+        TipoJornada tipoJornadaActualizado = datosActualizados.getTipoJornada();
+        if (tipoJornadaActualizado != null) {
             personalExistente.setTipoJornada(tipoJornadaActualizado);
         }
 
@@ -176,18 +176,19 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setHorasJornadaParcial(datosActualizados.getHorasJornadaParcial());
         }
 
-        String tipoContratoActualizado = normalizarTextoOpcional(datosActualizados.getTipoContrato());
-        if (tipoContratoActualizado != null && !tipoContratoActualizado.isBlank()) {
+        TipoContrato tipoContratoActualizado = datosActualizados.getTipoContrato();
+        if (tipoContratoActualizado != null) {
             personalExistente.setTipoContrato(tipoContratoActualizado);
         }
 
-        String grupoProfesionalActualizado = normalizarTextoOpcional(datosActualizados.getGrupoProfesional());
-        if (grupoProfesionalActualizado != null && !grupoProfesionalActualizado.isBlank()) {
+        GrupoProfesional grupoProfesionalActualizado = datosActualizados.getGrupoProfesional();
+        if (grupoProfesionalActualizado != null) {
             personalExistente.setGrupoProfesional(grupoProfesionalActualizado);
         }
 
-        if (datosActualizados.getConvenioLaboral() != null) {
-            personalExistente.setConvenioLaboral(normalizarTextoOpcional(datosActualizados.getConvenioLaboral()));
+        ConvenioLaboral convenioLaboralActualizado = datosActualizados.getConvenioLaboral();
+        if (convenioLaboralActualizado != null) {
+            personalExistente.setConvenioLaboral(convenioLaboralActualizado);
         }
 
         if (datosActualizados.getNumeroCuenta() != null) {
@@ -379,13 +380,13 @@ public class PersonalService implements UserDetailsService {
             personal.setNumeroHijos(0);
         }
         if (personal.getTipoJornada() == null) {
-            personal.setTipoJornada("Completa");
+            personal.setTipoJornada(TipoJornada.COMPLETA);
         }
         if (personal.getTipoContrato() == null) {
-            personal.setTipoContrato("Temporal");
+            personal.setTipoContrato(TipoContrato.TEMPORAL);
         }
         if (personal.getGrupoProfesional() == null) {
-            personal.setGrupoProfesional("1");
+            personal.setGrupoProfesional(GrupoProfesional.GRUPO_1);
         }
         if (personal.getDiscapacidad() == null) {
             personal.setDiscapacidad(false);

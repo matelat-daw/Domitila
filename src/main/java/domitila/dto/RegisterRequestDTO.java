@@ -1,6 +1,10 @@
 package domitila.dto;
 
-import domitila.entity.Sexo;
+import domitila.enums.ConvenioLaboral;
+import domitila.enums.GrupoProfesional;
+import domitila.enums.Sexo;
+import domitila.enums.TipoContrato;
+import domitila.enums.TipoJornada;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -43,15 +47,15 @@ public record RegisterRequestDTO (
 
     Integer numeroHijos,
 
-    String tipoJornada,
+    TipoJornada tipoJornada,
 
     BigDecimal horasJornadaParcial,
 
-    String tipoContrato,
+    TipoContrato tipoContrato,
 
-    String grupoProfesional,
+    GrupoProfesional grupoProfesional,
 
-    String convenioLaboral,
+    ConvenioLaboral convenioLaboral,
 
     @Size(max = 34, message = "El número de cuenta no puede tener más de 34 caracteres")
     String numeroCuenta,

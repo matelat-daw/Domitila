@@ -6,12 +6,19 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
@@ -50,7 +57,19 @@ public class ApiExceptionHandler {
             return ResponseEntity.badRequest().body("Hay un campo numérico con un valor inválido.");
         }
         if (normalized.contains("sexo")) {
-            return ResponseEntity.badRequest().body("El sexo es inválido. Usa Hombre, Mujer o No binario.");
+            return ResponseEntity.badRequest().body("El sexo es inválido. Usa Hombre, Mujer o No Binario.");
+        }
+        if (normalized.contains("tipojornada") || normalized.contains("tipo_jornada")) {
+            return ResponseEntity.badRequest().body("El tipo de jornada es inválido. Usa Completa o Parcial.");
+        }
+        if (normalized.contains("tipocontrato") || normalized.contains("tipo_contrato")) {
+            return ResponseEntity.badRequest().body("El tipo de contrato es inválido. Usa Indefinido o Temporal.");
+        }
+        if (normalized.contains("grupoprofesional") || normalized.contains("grupo_profesional")) {
+            return ResponseEntity.badRequest().body("El grupo profesional es inválido. Usa 1, 2, 3 o 4.");
+        }
+        if (normalized.contains("conveniolaboral") || normalized.contains("convenio_laboral")) {
+            return ResponseEntity.badRequest().body("El convenio laboral es inválido. Usa Accion social o Reforma juvenil.");
         }
 
         return ResponseEntity.badRequest().body("La solicitud contiene datos con formato incorrecto.");
@@ -59,6 +78,19 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex) {
         return ResponseEntity.badRequest().body("El parámetro " + ex.getName() + " no tiene un formato válido.");
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<String> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest().body("Falta el parámetro obligatorio: " + ex.getParameterName() + ".");
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<String> handleMissingServletRequestPart(MissingServletRequestPartException ex) {
+        if ("file".equalsIgnoreCase(ex.getRequestPartName())) {
+            return ResponseEntity.badRequest().body("Debes adjuntar una imagen en el campo file.");
+        }
+        return ResponseEntity.badRequest().body("Falta una parte obligatoria de la solicitud: " + ex.getRequestPartName() + ".");
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -88,6 +120,42 @@ public class ApiExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<String> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex) {
         return ResponseEntity.badRequest().body("La imagen supera el tamaño máximo permitido de 5 MB.");
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<String> handleMultipartException(MultipartException ex) {
+        return ResponseEntity.badRequest().body("La solicitud multipart no es válida. Revisa el archivo enviado.");
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<String> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body("El tipo de contenido no es compatible con este endpoint.");
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        String message = ex.getMessage();
+        return ResponseEntity.badRequest()
+                .body(message == null || message.isBlank() ? "La solicitud contiene valores no válidos." : message);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body("No tienes permisos para realizar esta operación.");
+    }
+
+    @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
+    public ResponseEntity<String> handleAuthenticationCredentialsNotFound(AuthenticationCredentialsNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("No se encontraron credenciales de autenticación.");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<String> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("La autenticación ha fallado.");
     }
 
     @ExceptionHandler(Exception.class)

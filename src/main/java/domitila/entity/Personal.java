@@ -1,5 +1,16 @@
 package domitila.entity;
 
+import domitila.entity.converter.ConvenioLaboralConverter;
+import domitila.entity.converter.GrupoProfesionalConverter;
+import domitila.entity.converter.SexoConverter;
+import domitila.entity.converter.TipoContratoConverter;
+import domitila.entity.converter.TipoJornadaConverter;
+import domitila.enums.ConvenioLaboral;
+import domitila.enums.GrupoProfesional;
+import domitila.enums.RoleName;
+import domitila.enums.Sexo;
+import domitila.enums.TipoContrato;
+import domitila.enums.TipoJornada;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -44,7 +55,7 @@ public class Personal {
     @Builder.Default
     private String dni = "PENDIENTE";
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = SexoConverter.class)
     @Column(name = "sexo", nullable = false, length = 16)
     @Builder.Default
     private Sexo sexo = Sexo.NO_BINARIO;
@@ -68,23 +79,27 @@ public class Personal {
     @Builder.Default
     private Integer numeroHijos = 0;
 
+    @Convert(converter = TipoJornadaConverter.class)
     @Column(name = "tipo_jornada", nullable = false, length = 16)
     @Builder.Default
-    private String tipoJornada = "Completa";
+    private TipoJornada tipoJornada = TipoJornada.COMPLETA;
 
     @Column(name = "horas_jornada_parcial", precision = 10, scale = 2)
     private BigDecimal horasJornadaParcial;
 
+    @Convert(converter = TipoContratoConverter.class)
     @Column(name = "tipo_contrato", nullable = false, length = 16)
     @Builder.Default
-    private String tipoContrato = "Temporal";
+    private TipoContrato tipoContrato = TipoContrato.TEMPORAL;
 
+    @Convert(converter = GrupoProfesionalConverter.class)
     @Column(name = "grupo_profesional", nullable = false, length = 8)
     @Builder.Default
-    private String grupoProfesional = "1";
+    private GrupoProfesional grupoProfesional = GrupoProfesional.GRUPO_1;
 
+    @Convert(converter = ConvenioLaboralConverter.class)
     @Column(name = "convenio_laboral", length = 32)
-    private String convenioLaboral;
+    private ConvenioLaboral convenioLaboral;
 
     @Column(name = "numero_cuenta", length = 34)
     private String numeroCuenta;

@@ -1,17 +1,16 @@
-package domitila.entity;
+package domitila.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
-public enum Sexo {
-    HOMBRE("Hombre"),
-    MUJER("Mujer"),
-    NO_BINARIO("No binario");
+public enum ConvenioLaboral {
+    ACCION_SOCIAL("Accion social"),
+    REFORMA_JUVENIL("Reforma juvenil");
 
     private final String displayName;
 
-    Sexo(String displayName) {
+    ConvenioLaboral(String displayName) {
         this.displayName = displayName;
     }
 
@@ -21,16 +20,17 @@ public enum Sexo {
     }
 
     @JsonCreator
-    public static Sexo fromValue(String value) {
+    public static ConvenioLaboral fromValue(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }
 
         String normalized = normalize(value);
         return Arrays.stream(values())
-                .filter(sexo -> normalize(sexo.name()).equals(normalized) || normalize(sexo.displayName).equals(normalized))
+                .filter(convenio -> normalize(convenio.name()).equals(normalized)
+                        || normalize(convenio.displayName).equals(normalized))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Sexo inválido: " + value));
+                .orElseThrow(() -> new IllegalArgumentException("Convenio laboral inválido: " + value));
     }
 
     private static String normalize(String value) {
