@@ -307,25 +307,45 @@ public class PersonalService implements UserDetailsService {
         return rutaNormalizada;
     }
 
-    public void actualizarMiClave(String correoElectronicoLogueado, String nuevaClave) {
-        Personal personal = personalRepository.findByCorreoElectronico(correoElectronicoLogueado)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Personal no encontrado con correo electrónico: " + correoElectronicoLogueado
-                ));
+    public String actualizarMiImagenPerfil(String correoElectronicoLogueado, MultipartFile file) {
+        Personal personal = obtenerPorCorreoElectronico(correoElectronicoLogueado);
+        String imagenAnterior = personal.getImagenPerfil();
+        String nuevaRuta = imageService.saveProfileImage(file, personal.getId());
 
+        if (imagenAnterior != null && !imagenAnterior.equals(nuevaRuta)) {
+            imageService.deleteImage(imagenAnterior);
+        }
+
+        personal.setImagenPerfil(nuevaRuta);
+        personalRepository.save(personal);
+        return nuevaRuta;
+    }
+
+    public String actualizarMiRutaImagenPerfil(String correoElectronicoLogueado, String imagenPerfil) {
+        Personal personal = obtenerPorCorreoElectronico(correoElectronicoLogueado);
+        String rutaNormalizada = normalizarRutaImagenPerfil(imagenPerfil);
+        personal.setImagenPerfil(rutaNormalizada);
+        personalRepository.save(personal);
+        return rutaNormalizada;
+    }
+
+    public void actualizarMiClave(String correoElectronicoLogueado, String nuevaClave) {
+        Personal personal = obtenerPorCorreoElectronico(correoElectronicoLogueado);
         personal.setClave(passwordEncoder.encode(nuevaClave));
         personalRepository.save(personal);
     }
 
     public UserSummaryDTO obtenerResumenPersonal(String correoElectronico) {
-        Personal personal = personalRepository.findByCorreoElectronico(correoElectronico)
+        Personal personal = obtenerPorCorreoElectronico(correoElectronico);
+        return toUserSummary(personal);
+    }
+
+    private Personal obtenerPorCorreoElectronico(String correoElectronico) {
+        return personalRepository.findByCorreoElectronico(correoElectronico)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "Personal no encontrado con correo electrónico: " + correoElectronico
                 ));
-
-        return toUserSummary(personal);
     }
 
     private String normalizarFiltro(String valor) {

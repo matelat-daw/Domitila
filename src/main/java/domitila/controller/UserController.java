@@ -2,7 +2,6 @@ package domitila.controller;
 
 import domitila.dto.CreateUserResponseDTO;
 import domitila.dto.RegisterRequestDTO;
-import domitila.dto.UpdateProfileImageRequest;
 import domitila.dto.UpdatePersonalRequestDTO;
 import domitila.dto.UpdateUserPasswordRequestDTO;
 import domitila.dto.UpdateUserRoleRequestDTO;
@@ -110,15 +109,14 @@ public class UserController {
         return ResponseEntity.ok("Clave actualizada exitosamente");
     }
 
-    @PatchMapping("/{id}/password")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> actualizarClaveUsuario(
-            @PathVariable Integer id,
-            @Valid @RequestBody UpdateUserPasswordRequestDTO request
+    @PostMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECNICO')")
+    public ResponseEntity<String> actualizarMiImagenPerfil(
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication
     ) {
-        Integer idInt = id.intValue();
-        personalService.actualizarClavePersonal(idInt, request.nuevaClave());
-        return ResponseEntity.ok("Clave actualizada exitosamente");
+        String rutaImagen = personalService.actualizarMiImagenPerfil(authentication.getName(), file);
+        return ResponseEntity.ok(rutaImagen);
     }
 
     @PatchMapping("/{id}/status")
@@ -167,25 +165,5 @@ public class UserController {
 
         personalService.actualizarPersonal(id, datosActualizados);
         return ResponseEntity.ok("Personal actualizado exitosamente en el sistema");
-    }
-
-    @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> actualizarImagenPerfil(
-            @PathVariable Integer id,
-            @RequestParam("file") MultipartFile file
-    ) {
-        String rutaImagen = personalService.actualizarImagenPerfil(id, file);
-        return ResponseEntity.ok(rutaImagen);
-    }
-
-    @PatchMapping("/{id}/profile-image")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> actualizarRutaImagenPerfil(
-            @PathVariable Integer id,
-            @Valid @RequestBody UpdateProfileImageRequest request
-    ) {
-        String rutaImagen = personalService.actualizarRutaImagenPerfil(id, request.imagenPerfil());
-        return ResponseEntity.ok(rutaImagen);
     }
 }
