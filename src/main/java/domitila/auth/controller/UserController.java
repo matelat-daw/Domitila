@@ -90,6 +90,16 @@ public class UserController {
         return ResponseEntity.ok(rutaImagen);
     }
 
+    @PostMapping(value = "/{id}/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> actualizarImagenPerfil(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        String rutaImagen = personalService.actualizarImagenPerfil(id, file);
+        return ResponseEntity.ok(rutaImagen);
+    }
+
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizarEstadoUsuario(

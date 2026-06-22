@@ -1,5 +1,6 @@
 package domitila.auth.service;
 
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
@@ -32,12 +33,19 @@ public class ImageService {
         return uploadDir;
     }
 
+    @PostConstruct
+    public void initializeUploadDirectory() {
+        ensureUploadBaseDirectory();
+    }
+
     public Path resolveUploadBasePath() {
         Path basePath = Paths.get(uploadDir);
         if (!basePath.isAbsolute()) {
             basePath = Paths.get(System.getProperty("user.dir")).resolve(basePath);
         }
-        return basePath.normalize();
+        Path normalizedBasePath = basePath.normalize();
+        ensureUploadBaseDirectory(normalizedBasePath);
+        return normalizedBasePath;
     }
 
     public boolean isValidImagePath(String imagePath) {
@@ -139,11 +147,27 @@ public class ImageService {
 
     private Path ensurePersonalImageDirectory(Integer personalId) throws IOException {
         Path basePath = resolveUploadBasePath();
-        Files.createDirectories(basePath);
-
         Path personalPath = basePath.resolve(String.valueOf(personalId));
         Files.createDirectories(personalPath);
         return personalPath;
+    }
+
+    private void ensureUploadBaseDirectory() {
+        ensureUploadBaseDirectory(Paths.get(uploadDir).isAbsolute()
+                ? Paths.get(uploadDir).normalize()
+                : Paths.get(System.getProperty("user.dir")).resolve(uploadDir).normalize());
+    }
+
+    private void ensureUploadBaseDirectory(Path basePath) {
+        try {
+            Files.createDirectories(basePath);
+        } catch (IOException ex) {
+            log.error("No se pudo crear la carpeta base de imágenes {}", basePath, ex);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo inicializar la carpeta de almacenamiento de imágenes."
+            );
+        }
     }
 
     private Path resolvePathUnderUploadBase(String relativePath) {
