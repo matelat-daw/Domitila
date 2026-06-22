@@ -346,14 +346,6 @@ public class PersonalService implements UserDetailsService {
         return nuevaRuta;
     }
 
-    public String actualizarRutaImagenPerfil(Integer id, String imagenPerfil) {
-        Personal personal = obtenerPorId(id);
-        String rutaNormalizada = normalizarRutaImagenPerfil(imagenPerfil);
-        personal.setImagenPerfil(rutaNormalizada);
-        personalRepository.save(personal);
-        return rutaNormalizada;
-    }
-
     public String actualizarMiImagenPerfil(String correoElectronicoLogueado, MultipartFile file) {
         Personal personal = obtenerPorCorreoElectronico(correoElectronicoLogueado);
         String imagenAnterior = personal.getImagenPerfil();
@@ -366,14 +358,6 @@ public class PersonalService implements UserDetailsService {
         personal.setImagenPerfil(nuevaRuta);
         personalRepository.save(personal);
         return nuevaRuta;
-    }
-
-    public String actualizarMiRutaImagenPerfil(String correoElectronicoLogueado, String imagenPerfil) {
-        Personal personal = obtenerPorCorreoElectronico(correoElectronicoLogueado);
-        String rutaNormalizada = normalizarRutaImagenPerfil(imagenPerfil);
-        personal.setImagenPerfil(rutaNormalizada);
-        personalRepository.save(personal);
-        return rutaNormalizada;
     }
 
     public void actualizarMiClave(String correoElectronicoLogueado, String nuevaClave) {
