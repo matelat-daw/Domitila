@@ -7,9 +7,6 @@ import java.time.LocalDate;
 
 import domitila.auth.enums.ConvenioLaboral;
 import domitila.auth.enums.GrupoProfesional;
-import domitila.auth.enums.Genero;
-import domitila.auth.enums.TipoContrato;
-import domitila.auth.enums.TipoJornada;
 
 public record UpdatePersonalRequestDTO(
         @Size(min = 2, max = 32, message = "El nombre debe tener entre 2 y 32 caracteres")
@@ -29,16 +26,16 @@ public record UpdatePersonalRequestDTO(
         @Size(max = 15, message = "El DNI no puede tener más de 15 caracteres")
         String dni,
 
-        Genero genero,
+        Integer generoId,
         LocalDate fechaNacimiento,
 
         @Size(max = 255, message = "El domicilio no puede tener más de 255 caracteres")
         String domicilioCompleto,
 
         Integer numeroHijos,
-        TipoJornada tipoJornada,
+        Integer tipoJornadaId,
         BigDecimal horasJornadaParcial,
-        TipoContrato tipoContrato,
+        Integer tipoContratoId,
         GrupoProfesional grupoProfesional,
         ConvenioLaboral convenioLaboral,
 

@@ -1,14 +1,19 @@
 package domitila.auth.service;
 
+import domitila.auth.dto.RegisterRequestDTO;
+import domitila.auth.dto.UpdatePersonalRequestDTO;
 import domitila.auth.dto.UserSummaryDTO;
+import domitila.auth.entity.GeneroCatalogo;
 import domitila.auth.entity.Personal;
+import domitila.auth.entity.TipoContratoCatalogo;
+import domitila.auth.entity.TipoJornadaCatalogo;
 import domitila.auth.enums.ConvenioLaboral;
 import domitila.auth.enums.GrupoProfesional;
 import domitila.auth.enums.RoleName;
-import domitila.auth.enums.Genero;
-import domitila.auth.enums.TipoContrato;
-import domitila.auth.enums.TipoJornada;
+import domitila.auth.repository.GeneroCatalogoRepository;
 import domitila.auth.repository.PersonalRepository;
+import domitila.auth.repository.TipoContratoCatalogoRepository;
+import domitila.auth.repository.TipoJornadaCatalogoRepository;
 import domitila.auth.security.PersonalDetails;
 import domitila.auth.util.DocumentoIdentidadUtil;
 import java.util.HashSet;
@@ -32,6 +37,9 @@ import java.util.Set;
 public class PersonalService implements UserDetailsService {
 
     private final PersonalRepository personalRepository;
+    private final GeneroCatalogoRepository generoCatalogoRepository;
+    private final TipoJornadaCatalogoRepository tipoJornadaCatalogoRepository;
+    private final TipoContratoCatalogoRepository tipoContratoCatalogoRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageService imageService;
 
@@ -46,7 +54,36 @@ public class PersonalService implements UserDetailsService {
     // --- MÉTODOS DEL CRUD ---
 
     // Crear (Guardar con contraseña encriptada)
-    public Personal registrarPersonal(Personal personal) {
+    public Personal registrarPersonal(RegisterRequestDTO request) {
+        Personal personal = Personal.builder()
+                .nombre(request.nombre())
+                .apellido1(request.apellido1())
+                .apellido2(request.apellido2())
+                .correoElectronico(request.correoElectronico())
+                .telefono(request.telefono())
+                .dni(request.dni())
+                .genero(resolveGenero(request.generoId()))
+                .fechaNacimiento(request.fechaNacimiento())
+                .domicilioCompleto(request.domicilioCompleto())
+                .numeroHijos(request.numeroHijos())
+                .tipoJornada(resolveTipoJornada(request.tipoJornadaId()))
+                .horasJornadaParcial(request.horasJornadaParcial())
+                .tipoContrato(resolveTipoContrato(request.tipoContratoId()))
+                .grupoProfesional(request.grupoProfesional())
+                .convenioLaboral(request.convenioLaboral())
+                .numeroCuenta(request.numeroCuenta())
+                .discapacidad(request.discapacidad())
+                .fechaAlta(request.fechaAlta())
+                .fechaBaja(request.fechaBaja())
+                .salarioBruto(request.salarioBruto())
+                .titulacion(request.titulacion())
+                .vehiculo(request.vehiculo())
+                .imagenPerfil(request.imagenPerfil())
+                .activo(request.activo())
+                .diasVacaciones(request.diasVacaciones())
+                .idCategoriaProfesional(request.idCategoriaProfesional())
+                .build();
+
         personal.setNombre(normalizarTexto(personal.getNombre()));
         personal.setApellido1(normalizarTexto(personal.getApellido1()));
         personal.setApellido2(normalizarTextoOpcional(personal.getApellido2()));
@@ -100,11 +137,11 @@ public class PersonalService implements UserDetailsService {
     }
 
     // Actualizar
-    public Personal actualizarPersonal(Integer id, Personal datosActualizados) {
+    public Personal actualizarPersonal(Integer id, UpdatePersonalRequestDTO request) {
         Personal personalExistente = obtenerPorId(id);
         
         // Verificar si el correo electrónico ya está en uso por otro personal diferente
-        String correoElectronicoActualizado = normalizarTextoOpcional(datosActualizados.getCorreoElectronico());
+        String correoElectronicoActualizado = normalizarTextoOpcional(request.correoElectronico());
         if (correoElectronicoActualizado != null && !correoElectronicoActualizado.isBlank()
             && !correoElectronicoActualizado.equalsIgnoreCase(personalExistente.getCorreoElectronico())
             && personalRepository.existsByCorreoElectronico(correoElectronicoActualizado)) {
@@ -112,25 +149,25 @@ public class PersonalService implements UserDetailsService {
         }
         
         // Verificar si el telefono ya está en uso por otro personal diferente
-        String telefonoActualizado = normalizarTextoOpcional(datosActualizados.getTelefono());
+        String telefonoActualizado = normalizarTextoOpcional(request.telefono());
         if (telefonoActualizado != null
             && !telefonoActualizado.equals(personalExistente.getTelefono())
             && personalRepository.existsByTelefono(telefonoActualizado)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El Teléfono ya está Registrado en la Base de Datos");
         }
         
-        String nombreActualizado = normalizarTextoOpcional(datosActualizados.getNombre());
+        String nombreActualizado = normalizarTextoOpcional(request.nombre());
         if (nombreActualizado != null && !nombreActualizado.isBlank()) {
             personalExistente.setNombre(nombreActualizado);
         }
 
-        String apellido1Actualizado = normalizarTextoOpcional(datosActualizados.getApellido1());
+        String apellido1Actualizado = normalizarTextoOpcional(request.apellido1());
         if (apellido1Actualizado != null && !apellido1Actualizado.isBlank()) {
             personalExistente.setApellido1(apellido1Actualizado);
         }
 
-        if (datosActualizados.getApellido2() != null) {
-            String apellido2Actualizado = normalizarTextoOpcional(datosActualizados.getApellido2());
+        if (request.apellido2() != null) {
+            String apellido2Actualizado = normalizarTextoOpcional(request.apellido2());
             personalExistente.setApellido2(apellido2Actualizado);
         }
 
@@ -138,11 +175,11 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setCorreoElectronico(correoElectronicoActualizado);
         }
 
-        if (datosActualizados.getTelefono() != null) {
+        if (request.telefono() != null) {
             personalExistente.setTelefono(telefonoActualizado);
         }
 
-        String dniActualizado = normalizarDocumentoIdentidad(datosActualizados.getDni());
+        String dniActualizado = normalizarDocumentoIdentidad(request.dni());
         if (dniActualizado != null && !dniActualizado.isBlank()) {
             validarDniObligatorio(dniActualizado);
             if (!dniActualizado.equalsIgnoreCase(personalExistente.getDni())
@@ -152,96 +189,89 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setDni(dniActualizado);
         }
 
-        Genero generoActualizado = datosActualizados.getGenero();
-        if (generoActualizado != null) {
-            personalExistente.setGenero(generoActualizado);
+        if (request.generoId() != null) {
+            personalExistente.setGenero(resolveGenero(request.generoId()));
         }
 
-        if (datosActualizados.getFechaNacimiento() != null) {
-            personalExistente.setFechaNacimiento(datosActualizados.getFechaNacimiento());
+        if (request.fechaNacimiento() != null) {
+            personalExistente.setFechaNacimiento(request.fechaNacimiento());
         }
 
-        if (datosActualizados.getDomicilioCompleto() != null) {
-            personalExistente.setDomicilioCompleto(normalizarTextoOpcional(datosActualizados.getDomicilioCompleto()));
+        if (request.domicilioCompleto() != null) {
+            personalExistente.setDomicilioCompleto(normalizarTextoOpcional(request.domicilioCompleto()));
         }
 
-        if (datosActualizados.getNumeroHijos() != null) {
-            personalExistente.setNumeroHijos(datosActualizados.getNumeroHijos());
+        if (request.numeroHijos() != null) {
+            personalExistente.setNumeroHijos(request.numeroHijos());
         }
 
-        TipoJornada tipoJornadaActualizado = datosActualizados.getTipoJornada();
-        if (tipoJornadaActualizado != null) {
-            personalExistente.setTipoJornada(tipoJornadaActualizado);
+        if (request.tipoJornadaId() != null) {
+            personalExistente.setTipoJornada(resolveTipoJornada(request.tipoJornadaId()));
         }
 
-        if (datosActualizados.getHorasJornadaParcial() != null) {
-            personalExistente.setHorasJornadaParcial(datosActualizados.getHorasJornadaParcial());
+        if (request.horasJornadaParcial() != null) {
+            personalExistente.setHorasJornadaParcial(request.horasJornadaParcial());
         }
 
-        TipoContrato tipoContratoActualizado = datosActualizados.getTipoContrato();
-        if (tipoContratoActualizado != null) {
-            personalExistente.setTipoContrato(tipoContratoActualizado);
+        if (request.tipoContratoId() != null) {
+            personalExistente.setTipoContrato(resolveTipoContrato(request.tipoContratoId()));
         }
 
-        GrupoProfesional grupoProfesionalActualizado = datosActualizados.getGrupoProfesional();
+        GrupoProfesional grupoProfesionalActualizado = request.grupoProfesional();
         if (grupoProfesionalActualizado != null) {
             personalExistente.setGrupoProfesional(grupoProfesionalActualizado);
         }
 
-        ConvenioLaboral convenioLaboralActualizado = datosActualizados.getConvenioLaboral();
+        ConvenioLaboral convenioLaboralActualizado = request.convenioLaboral();
         if (convenioLaboralActualizado != null) {
             personalExistente.setConvenioLaboral(convenioLaboralActualizado);
         }
 
-        if (datosActualizados.getNumeroCuenta() != null) {
-            personalExistente.setNumeroCuenta(normalizarTextoOpcional(datosActualizados.getNumeroCuenta()));
+        if (request.numeroCuenta() != null) {
+            personalExistente.setNumeroCuenta(normalizarTextoOpcional(request.numeroCuenta()));
         }
 
-        if (datosActualizados.getDiscapacidad() != null) {
-            personalExistente.setDiscapacidad(datosActualizados.getDiscapacidad());
+        if (request.discapacidad() != null) {
+            personalExistente.setDiscapacidad(request.discapacidad());
         }
 
-        if (datosActualizados.getFechaAlta() != null) {
-            personalExistente.setFechaAlta(datosActualizados.getFechaAlta());
+        if (request.fechaAlta() != null) {
+            personalExistente.setFechaAlta(request.fechaAlta());
         }
 
-        if (datosActualizados.getFechaBaja() != null) {
-            personalExistente.setFechaBaja(datosActualizados.getFechaBaja());
+        if (request.fechaBaja() != null) {
+            personalExistente.setFechaBaja(request.fechaBaja());
         }
 
-        if (datosActualizados.getSalarioBruto() != null) {
-            personalExistente.setSalarioBruto(datosActualizados.getSalarioBruto());
+        if (request.salarioBruto() != null) {
+            personalExistente.setSalarioBruto(request.salarioBruto());
         }
 
-        if (datosActualizados.getTitulacion() != null) {
-            personalExistente.setTitulacion(normalizarTextoOpcional(datosActualizados.getTitulacion()));
+        if (request.titulacion() != null) {
+            personalExistente.setTitulacion(normalizarTextoOpcional(request.titulacion()));
         }
 
-        if (datosActualizados.getVehiculo() != null) {
-            personalExistente.setVehiculo(datosActualizados.getVehiculo());
+        if (request.vehiculo() != null) {
+            personalExistente.setVehiculo(request.vehiculo());
         }
 
-        if (datosActualizados.getImagenPerfil() != null) {
-            personalExistente.setImagenPerfil(normalizarRutaImagenPerfil(datosActualizados.getImagenPerfil()));
+        if (request.imagenPerfil() != null) {
+            personalExistente.setImagenPerfil(normalizarRutaImagenPerfil(request.imagenPerfil()));
         }
 
-        if (datosActualizados.getActivo() != null) {
-            personalExistente.setActivo(datosActualizados.getActivo());
+        if (request.activo() != null) {
+            personalExistente.setActivo(request.activo());
         }
 
-        if (datosActualizados.getDiasVacaciones() != null) {
-            personalExistente.setDiasVacaciones(datosActualizados.getDiasVacaciones());
+        if (request.diasVacaciones() != null) {
+            personalExistente.setDiasVacaciones(request.diasVacaciones());
         }
 
-        if (datosActualizados.getIdCategoriaProfesional() != null) {
-            personalExistente.setIdCategoriaProfesional(datosActualizados.getIdCategoriaProfesional());
+        if (request.idCategoriaProfesional() != null) {
+            personalExistente.setIdCategoriaProfesional(request.idCategoriaProfesional());
         }
         
         // Solo actualiza la clave si se envía una nueva en la petición
-        if (datosActualizados.getClave() != null && !datosActualizados.getClave().isBlank()) {
-            personalExistente.setClave(passwordEncoder.encode(datosActualizados.getClave()));
-        }
-
         return personalRepository.save(personalExistente);
     }
 
@@ -388,7 +418,8 @@ public class PersonalService implements UserDetailsService {
                 personal.getApellido2(),
                 personal.getCorreoElectronico(),
                 personal.getTelefono(),
-                personal.getGenero() == null ? null : personal.getGenero().getDisplayName(),
+                personal.getGenero() == null ? null : personal.getGenero().getId(),
+                personal.getGenero() == null ? null : personal.getGenero().getNombre(),
                 roles,
                 personal.getImagenPerfil(),
                 personal.getActivo()
@@ -419,16 +450,16 @@ public class PersonalService implements UserDetailsService {
 
     private void aplicarDefaultsPersonal(Personal personal) {
         if (personal.getGenero() == null) {
-            personal.setGenero(Genero.NO_BINARIO);
+            personal.setGenero(resolveGeneroPorNombre("No Binario"));
         }
         if (personal.getNumeroHijos() == null) {
             personal.setNumeroHijos(0);
         }
         if (personal.getTipoJornada() == null) {
-            personal.setTipoJornada(TipoJornada.COMPLETA);
+            personal.setTipoJornada(resolveTipoJornadaPorNombre("Completa"));
         }
         if (personal.getTipoContrato() == null) {
-            personal.setTipoContrato(TipoContrato.TEMPORAL);
+            personal.setTipoContrato(resolveTipoContratoPorNombre("Temporal"));
         }
         if (personal.getGrupoProfesional() == null) {
             personal.setGrupoProfesional(GrupoProfesional.GRUPO_1);
@@ -487,5 +518,35 @@ public class PersonalService implements UserDetailsService {
         if (dni == null || !DocumentoIdentidadUtil.validarDniNie(dni)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El DNI/NIE no es correcto. Revisa el número y la letra.");
         }
+    }
+
+    private GeneroCatalogo resolveGenero(Integer generoId) {
+        return generoCatalogoRepository.findById(generoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El género seleccionado no existe."));
+    }
+
+    private TipoJornadaCatalogo resolveTipoJornada(Integer tipoJornadaId) {
+        return tipoJornadaCatalogoRepository.findById(tipoJornadaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo de jornada seleccionado no existe."));
+    }
+
+    private TipoContratoCatalogo resolveTipoContrato(Integer tipoContratoId) {
+        return tipoContratoCatalogoRepository.findById(tipoContratoId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo de contrato seleccionado no existe."));
+    }
+
+    private GeneroCatalogo resolveGeneroPorNombre(String nombre) {
+        return generoCatalogoRepository.findByNombreIgnoreCase(nombre)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No existe el género por defecto configurado en base de datos."));
+    }
+
+    private TipoJornadaCatalogo resolveTipoJornadaPorNombre(String nombre) {
+        return tipoJornadaCatalogoRepository.findByNombreIgnoreCase(nombre)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No existe el tipo de jornada por defecto configurado en base de datos."));
+    }
+
+    private TipoContratoCatalogo resolveTipoContratoPorNombre(String nombre) {
+        return tipoContratoCatalogoRepository.findByNombreIgnoreCase(nombre)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No existe el tipo de contrato por defecto configurado en base de datos."));
     }
 }

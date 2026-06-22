@@ -2,18 +2,12 @@ package domitila.auth.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import domitila.proyecto.Proyecto;
+import domitila.auth.proyecto.Proyecto;
 import domitila.auth.entity.converter.ConvenioLaboralConverter;
 import domitila.auth.entity.converter.GrupoProfesionalConverter;
-import domitila.auth.entity.converter.GeneroConverter;
-import domitila.auth.entity.converter.TipoContratoConverter;
-import domitila.auth.entity.converter.TipoJornadaConverter;
 import domitila.auth.enums.ConvenioLaboral;
 import domitila.auth.enums.GrupoProfesional;
 import domitila.auth.enums.RoleName;
-import domitila.auth.enums.Genero;
-import domitila.auth.enums.TipoContrato;
-import domitila.auth.enums.TipoJornada;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -57,10 +51,9 @@ public class Personal {
     @Builder.Default
     private String dni = "PENDIENTE";
 
-    @Convert(converter = GeneroConverter.class)
-    @Column(name = "genero", nullable = false, length = 16)
-    @Builder.Default
-    private Genero genero = Genero.NO_BINARIO;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "genero", referencedColumnName = "id", nullable = false)
+    private GeneroCatalogo genero;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
@@ -81,18 +74,16 @@ public class Personal {
     @Builder.Default
     private Integer numeroHijos = 0;
 
-    @Convert(converter = TipoJornadaConverter.class)
-    @Column(name = "tipo_jornada", nullable = false, length = 16)
-    @Builder.Default
-    private TipoJornada tipoJornada = TipoJornada.COMPLETA;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tipo_jornada", referencedColumnName = "id", nullable = false)
+    private TipoJornadaCatalogo tipoJornada;
 
     @Column(name = "horas_jornada_parcial", precision = 10, scale = 2)
     private BigDecimal horasJornadaParcial;
 
-    @Convert(converter = TipoContratoConverter.class)
-    @Column(name = "tipo_contrato", nullable = false, length = 16)
-    @Builder.Default
-    private TipoContrato tipoContrato = TipoContrato.TEMPORAL;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tipo_contrato", referencedColumnName = "id", nullable = false)
+    private TipoContratoCatalogo tipoContrato;
 
     @Convert(converter = GrupoProfesionalConverter.class)
     @Column(name = "grupo_profesional", nullable = false, length = 8)

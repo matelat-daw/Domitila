@@ -9,6 +9,7 @@ public record UserSummaryDTO (
     String apellido2,
     String correoElectronico,
     String telefono,
+    Integer generoId,
     String sexo,
     Set<String> roles,
     String imagenPerfil,

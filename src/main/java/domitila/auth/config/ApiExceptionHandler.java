@@ -56,14 +56,14 @@ public class ApiExceptionHandler {
         if (normalized.contains("bigdecimal") || normalized.contains("double") || normalized.contains("float")) {
             return ResponseEntity.badRequest().body("Hay un campo numérico con un valor inválido.");
         }
-        if (normalized.contains("sexo")) {
-            return ResponseEntity.badRequest().body("El sexo es inválido. Usa Hombre, Mujer o No Binario.");
+        if (normalized.contains("generoid") || normalized.contains("genero")) {
+            return ResponseEntity.badRequest().body("El identificador del género no es válido.");
         }
-        if (normalized.contains("tipojornada") || normalized.contains("tipo_jornada")) {
-            return ResponseEntity.badRequest().body("El tipo de jornada es inválido. Usa Completa o Parcial.");
+        if (normalized.contains("tipojornadaid") || normalized.contains("tipo_jornada")) {
+            return ResponseEntity.badRequest().body("El identificador del tipo de jornada no es válido.");
         }
-        if (normalized.contains("tipocontrato") || normalized.contains("tipo_contrato")) {
-            return ResponseEntity.badRequest().body("El tipo de contrato es inválido. Usa Indefinido o Temporal.");
+        if (normalized.contains("tipocontratoid") || normalized.contains("tipo_contrato")) {
+            return ResponseEntity.badRequest().body("El identificador del tipo de contrato no es válido.");
         }
         if (normalized.contains("grupoprofesional") || normalized.contains("grupo_profesional")) {
             return ResponseEntity.badRequest().body("El grupo profesional es inválido. Usa 1, 2, 3 o 4.");

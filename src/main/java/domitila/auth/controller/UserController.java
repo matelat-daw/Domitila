@@ -7,7 +7,6 @@ import domitila.auth.dto.UpdateUserPasswordRequestDTO;
 import domitila.auth.dto.UpdateUserRoleRequestDTO;
 import domitila.auth.dto.UpdateUserStatusRequestDTO;
 import domitila.auth.dto.UserSummaryDTO;
-import domitila.auth.entity.Personal;
 import domitila.auth.service.PersonalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,36 +50,7 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CreateUserResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
-        Personal nuevoPersonal = Personal.builder()
-                .nombre(request.nombre())
-                .apellido1(request.apellido1())
-                .apellido2(request.apellido2())
-                .correoElectronico(request.correoElectronico())
-                .telefono(request.telefono())
-                .dni(request.dni())
-                .genero(request.genero())
-                .fechaNacimiento(request.fechaNacimiento())
-                .domicilioCompleto(request.domicilioCompleto())
-                .numeroHijos(request.numeroHijos())
-                .tipoJornada(request.tipoJornada())
-                .horasJornadaParcial(request.horasJornadaParcial())
-                .tipoContrato(request.tipoContrato())
-                .grupoProfesional(request.grupoProfesional())
-                .convenioLaboral(request.convenioLaboral())
-                .numeroCuenta(request.numeroCuenta())
-                .discapacidad(request.discapacidad())
-                .fechaAlta(request.fechaAlta())
-                .fechaBaja(request.fechaBaja())
-                .salarioBruto(request.salarioBruto())
-                .titulacion(request.titulacion())
-                .vehiculo(request.vehiculo())
-                .imagenPerfil(request.imagenPerfil())
-                .activo(request.activo())
-                .diasVacaciones(request.diasVacaciones())
-                .idCategoriaProfesional(request.idCategoriaProfesional())
-                .build();
-
-        Personal personalRegistrado = personalService.registrarPersonal(nuevoPersonal);
+        var personalRegistrado = personalService.registrarPersonal(request);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                         .body(new CreateUserResponseDTO(
@@ -135,36 +105,7 @@ public class UserController {
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> actualizar(@PathVariable Integer id, @Valid @RequestBody UpdatePersonalRequestDTO request) {
-        Personal datosActualizados = Personal.builder()
-                .nombre(request.nombre())
-                .apellido1(request.apellido1())
-                .apellido2(request.apellido2())
-                .correoElectronico(request.correoElectronico())
-                .telefono(request.telefono())
-                .dni(request.dni())
-                .genero(request.genero())
-                .fechaNacimiento(request.fechaNacimiento())
-                .domicilioCompleto(request.domicilioCompleto())
-                .numeroHijos(request.numeroHijos())
-                .tipoJornada(request.tipoJornada())
-                .horasJornadaParcial(request.horasJornadaParcial())
-                .tipoContrato(request.tipoContrato())
-                .grupoProfesional(request.grupoProfesional())
-                .convenioLaboral(request.convenioLaboral())
-                .numeroCuenta(request.numeroCuenta())
-                .discapacidad(request.discapacidad())
-                .fechaAlta(request.fechaAlta())
-                .fechaBaja(request.fechaBaja())
-                .salarioBruto(request.salarioBruto())
-                .titulacion(request.titulacion())
-                .vehiculo(request.vehiculo())
-                .imagenPerfil(request.imagenPerfil())
-                .activo(request.activo())
-                .diasVacaciones(request.diasVacaciones())
-                .idCategoriaProfesional(request.idCategoriaProfesional())
-                .build();
-
-        personalService.actualizarPersonal(id, datosActualizados);
+        personalService.actualizarPersonal(id, request);
         return ResponseEntity.ok("Personal actualizado exitosamente en el sistema");
     }
 

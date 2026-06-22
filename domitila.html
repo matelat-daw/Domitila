@@ -508,12 +508,9 @@
                                 <input type="text" id="create-user-telefono" required>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
-                                <label for="create-user-sexo">Sexo</label>
-                                <select id="create-user-sexo">
-                                    <option value="">Selecciona una opción</option>
-                                    <option value="Hombre">Hombre</option>
-                                    <option value="Mujer">Mujer</option>
-                                    <option value="No binario">No binario</option>
+                                <label for="create-user-genero">Género</label>
+                                <select id="create-user-genero" required>
+                                    <option value="">Selecciona un género</option>
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
@@ -526,10 +523,8 @@
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-tipo-jornada">Tipo de jornada</label>
-                                <select id="create-user-tipo-jornada">
-                                    <option value="">Selecciona...</option>
-                                    <option value="Completa">Completa</option>
-                                    <option value="Parcial">Parcial</option>
+                                <select id="create-user-tipo-jornada" required>
+                                    <option value="">Selecciona un tipo de jornada</option>
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
@@ -538,10 +533,8 @@
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="create-user-tipo-contrato">Tipo de contrato</label>
-                                <select id="create-user-tipo-contrato">
-                                    <option value="">Selecciona...</option>
-                                    <option value="Indefinido">Indefinido</option>
-                                    <option value="Temporal">Temporal</option>
+                                <select id="create-user-tipo-contrato" required>
+                                    <option value="">Selecciona un tipo de contrato</option>
                                 </select>
                             </div>
                             <div class="form-group" style="margin-bottom: 0;">
@@ -783,6 +776,11 @@
             items: [],
             selectedProjectId: null
         };
+        let catalogsState = {
+            generos: [],
+            tiposJornada: [],
+            tiposContrato: []
+        };
         let passwordChangeState = {
             userId: null,
             targetLabel: '',
@@ -817,7 +815,7 @@
         const createUserCorreoElectronico = document.getElementById('create-user-correo-electronico');
         const createUserDni = document.getElementById('create-user-dni');
         const createUserTelefono = document.getElementById('create-user-telefono');
-        const createUserSexo = document.getElementById('create-user-sexo');
+        const createUserGenero = document.getElementById('create-user-genero');
         const createUserFechaNacimiento = document.getElementById('create-user-fecha-nacimiento');
         const createUserDomicilioCompleto = document.getElementById('create-user-domicilio-completo');
         const createUserNumeroHijos = document.getElementById('create-user-numero-hijos');
@@ -936,6 +934,57 @@
 
             const parsed = Number.parseFloat(normalized);
             return Number.isNaN(parsed) ? null : parsed;
+        }
+
+        function populateCatalogSelect(selectElement, items, placeholder) {
+            const previousValue = getNullableString(selectElement.value);
+            const options = Array.isArray(items) ? items : [];
+
+            selectElement.innerHTML = '';
+
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = placeholder;
+            selectElement.appendChild(placeholderOption);
+
+            options.forEach(item => {
+                const option = document.createElement('option');
+                option.value = String(item.id);
+                option.textContent = item.nombre ?? `ID ${item.id}`;
+                selectElement.appendChild(option);
+            });
+
+            if (previousValue && options.some(item => String(item.id) === previousValue)) {
+                selectElement.value = previousValue;
+            }
+        }
+
+        function hasLoadedCreateUserCatalogs() {
+            return catalogsState.generos.length > 0
+                && catalogsState.tiposJornada.length > 0
+                && catalogsState.tiposContrato.length > 0;
+        }
+
+        async function fetchCatalogs() {
+            const response = await fetch(`${API_BASE_URL}/api/catalogs`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            const body = await parseResponseBody(response);
+            if (!response.ok) {
+                throw new Error(typeof body === 'string' ? body : 'No fue posible cargar los catálogos del formulario');
+            }
+
+            catalogsState = {
+                generos: Array.isArray(body?.generos) ? body.generos : [],
+                tiposJornada: Array.isArray(body?.tiposJornada) ? body.tiposJornada : [],
+                tiposContrato: Array.isArray(body?.tiposContrato) ? body.tiposContrato : []
+            };
+
+            populateCatalogSelect(createUserGenero, catalogsState.generos, 'Selecciona un género');
+            populateCatalogSelect(createUserTipoJornada, catalogsState.tiposJornada, 'Selecciona un tipo de jornada');
+            populateCatalogSelect(createUserTipoContrato, catalogsState.tiposContrato, 'Selecciona un tipo de contrato');
         }
 
         function getUsersFromResponse(payload) {
@@ -1505,6 +1554,12 @@
                 return;
             }
 
+            if (!hasLoadedCreateUserCatalogs()) {
+                createUserError.textContent = 'Primero deben cargarse los catálogos de género, tipo de jornada y tipo de contrato.';
+                createUserError.classList.remove('hidden');
+                return;
+            }
+
             createUserError.classList.add('hidden');
             createUserSuccess.classList.add('hidden');
             submitCreateUserBtn.disabled = true;
@@ -1516,13 +1571,13 @@
                 correoElectronico: createUserCorreoElectronico.value.trim(),
                 dni: createUserDni.value.trim(),
                 telefono: createUserTelefono.value.trim(),
-                sexo: getNullableString(createUserSexo.value),
+                generoId: getNullableInteger(createUserGenero.value),
                 fechaNacimiento: getNullableString(createUserFechaNacimiento.value),
                 domicilioCompleto: getNullableString(createUserDomicilioCompleto.value),
                 numeroHijos: getNullableInteger(createUserNumeroHijos.value),
-                tipoJornada: getNullableString(createUserTipoJornada.value),
+                tipoJornadaId: getNullableInteger(createUserTipoJornada.value),
                 horasJornadaParcial: getNullableDecimal(createUserHorasJornadaParcial.value),
-                tipoContrato: getNullableString(createUserTipoContrato.value),
+                tipoContratoId: getNullableInteger(createUserTipoContrato.value),
                 grupoProfesional: getNullableString(createUserGrupoProfesional.value),
                 convenioLaboral: getNullableString(createUserConvenioLaboral.value),
                 numeroCuenta: getNullableString(createUserNumeroCuenta.value),
@@ -1712,6 +1767,12 @@
             const tasks = [fetchProjects()];
             if (isAdmin()) {
                 tasks.push(fetchUsers());
+                tasks.push(
+                    fetchCatalogs().catch(error => {
+                        createUserError.textContent = error.message;
+                        createUserError.classList.remove('hidden');
+                    })
+                );
             }
             await Promise.all(tasks);
         }
@@ -1731,6 +1792,11 @@
             projectsState = {
                 items: [],
                 selectedProjectId: null
+            };
+            catalogsState = {
+                generos: [],
+                tiposJornada: [],
+                tiposContrato: []
             };
             updateHeader();
             updateSectionsVisibility();
@@ -1784,7 +1850,19 @@
         });
 
         changeMyPasswordBtn.addEventListener('click', changeMyPassword);
-        openCreateUserBtn.addEventListener('click', () => toggleCreateUserPanel(true));
+        openCreateUserBtn.addEventListener('click', async () => {
+            createUserError.classList.add('hidden');
+            if (!hasLoadedCreateUserCatalogs()) {
+                try {
+                    await fetchCatalogs();
+                } catch (error) {
+                    createUserError.textContent = error.message;
+                    createUserError.classList.remove('hidden');
+                    return;
+                }
+            }
+            toggleCreateUserPanel(true);
+        });
         cancelCreateUserBtn.addEventListener('click', () => toggleCreateUserPanel(false));
         passwordModalCancelBtn.addEventListener('click', closePasswordModal);
         passwordModalForm.addEventListener('submit', submitPasswordChange);
