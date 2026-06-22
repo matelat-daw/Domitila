@@ -38,7 +38,7 @@ public class Personal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_trabajador")
+    @Column(name = "id")
     @EqualsAndHashCode.Include
     private Integer id;
 
@@ -147,12 +147,12 @@ public class Personal {
     @Builder.Default
     private Set<RoleName> roles = new HashSet<>();
 
-//     @ManyToMany(fetch = FetchType.LAZY)
-//     @JoinTable(
-//             name = "personal_laboral_proyecto",
-//             joinColumns = @JoinColumn(name = "trabajador_id", referencedColumnName = "id_trabajador"),
-//             inverseJoinColumns = @JoinColumn(name = "proyecto_id", referencedColumnName = "id_proyecto")
-//     )
-    // @Builder.Default
-    // private Set<Proyecto> proyectos = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "personal_laboral_proyecto",
+            joinColumns = @JoinColumn(name = "id_personal_laboral", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_proyecto", referencedColumnName = "id")
+    )
+    @Builder.Default
+    private Set<Proyecto> proyectos = new HashSet<>();
 }

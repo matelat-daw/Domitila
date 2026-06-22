@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -165,5 +166,12 @@ public class UserController {
 
         personalService.actualizarPersonal(id, datosActualizados);
         return ResponseEntity.ok("Personal actualizado exitosamente en el sistema");
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+        personalService.eliminarPersonal(id);
+        return ResponseEntity.noContent().build();
     }
 }

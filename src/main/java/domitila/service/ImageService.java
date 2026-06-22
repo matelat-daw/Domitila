@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -82,6 +84,35 @@ public class ImageService {
             deleteParentDirectoryIfEmpty(imagePathResolved.getParent());
         } catch (IOException ex) {
             log.warn("No se pudo eliminar la imagen {}", imagePath, ex);
+        }
+    }
+
+    public void deletePersonalDirectory(Integer personalId) {
+        if (personalId == null) {
+            return;
+        }
+
+        Path personalDirectory = resolveUploadBasePath().resolve(String.valueOf(personalId)).normalize();
+        if (!personalDirectory.startsWith(resolveUploadBasePath()) || !Files.exists(personalDirectory)) {
+            return;
+        }
+
+        try (Stream<Path> paths = Files.walk(personalDirectory)) {
+            paths.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        } catch (RuntimeException ex) {
+            if (ex.getCause() instanceof IOException ioEx) {
+                log.warn("No se pudo eliminar la carpeta de imágenes del usuario {}", personalId, ioEx);
+                return;
+            }
+            throw ex;
+        } catch (IOException ex) {
+            log.warn("No se pudo eliminar la carpeta de imágenes del usuario {}", personalId, ex);
         }
     }
 

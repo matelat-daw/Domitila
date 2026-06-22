@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Set;
@@ -245,10 +246,26 @@ public class PersonalService implements UserDetailsService {
     }
 
     // Eliminar
+    @Transactional
     public void eliminarPersonal(Integer id) {
         Personal personal = obtenerPorId(id);
-        imageService.deleteImage(personal.getImagenPerfil());
+        String imagenPerfil = personal.getImagenPerfil();
+
+        if (personal.getRoles() != null) {
+            personal.getRoles().clear();
+        }
+        if (personal.getProyectos() != null) {
+            personal.getProyectos().clear();
+        }
+        personal.setImagenPerfil(null);
+
+        personalRepository.save(personal);
+        personalRepository.flush();
         personalRepository.delete(personal);
+        personalRepository.flush();
+
+        imageService.deleteImage(imagenPerfil);
+        imageService.deletePersonalDirectory(id);
     }
 
     public void actualizarRolPersonal(Integer id, String role, String action, String correoElectronicoLogueado) {
