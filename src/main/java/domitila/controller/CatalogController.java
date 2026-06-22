@@ -1,12 +1,13 @@
-package domitila.controller;
+package domitila.auth.controller;
 
-import domitila.dto.CatalogsResponseDTO;
-import domitila.enums.ConvenioLaboral;
-import domitila.enums.GrupoProfesional;
-import domitila.enums.RoleName;
-import domitila.enums.Sexo;
-import domitila.enums.TipoContrato;
-import domitila.enums.TipoJornada;
+import domitila.auth.dto.CatalogsResponseDTO;
+import domitila.auth.enums.ConvenioLaboral;
+import domitila.auth.enums.GrupoProfesional;
+import domitila.auth.enums.RoleName;
+import domitila.auth.enums.Genero;
+import domitila.auth.enums.TipoContrato;
+import domitila.auth.enums.TipoJornada;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
@@ -22,7 +23,7 @@ public class CatalogController {
     @GetMapping
     public ResponseEntity<CatalogsResponseDTO> obtenerCatalogos() {
         CatalogsResponseDTO response = new CatalogsResponseDTO(
-                mapValues(Sexo.values(), Sexo::getDisplayName),
+                mapValues(Genero.values(), Genero::getDisplayName),
                 mapValues(TipoJornada.values(), TipoJornada::getDisplayName),
                 mapValues(TipoContrato.values(), TipoContrato::getDisplayName),
                 mapValues(GrupoProfesional.values(), GrupoProfesional::getCode),

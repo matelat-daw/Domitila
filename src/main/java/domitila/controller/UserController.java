@@ -1,14 +1,14 @@
-package domitila.controller;
+package domitila.auth.controller;
 
-import domitila.dto.CreateUserResponseDTO;
-import domitila.dto.RegisterRequestDTO;
-import domitila.dto.UpdatePersonalRequestDTO;
-import domitila.dto.UpdateUserPasswordRequestDTO;
-import domitila.dto.UpdateUserRoleRequestDTO;
-import domitila.dto.UpdateUserStatusRequestDTO;
-import domitila.dto.UserSummaryDTO;
-import domitila.entity.Personal;
-import domitila.service.PersonalService;
+import domitila.auth.dto.CreateUserResponseDTO;
+import domitila.auth.dto.RegisterRequestDTO;
+import domitila.auth.dto.UpdatePersonalRequestDTO;
+import domitila.auth.dto.UpdateUserPasswordRequestDTO;
+import domitila.auth.dto.UpdateUserRoleRequestDTO;
+import domitila.auth.dto.UpdateUserStatusRequestDTO;
+import domitila.auth.dto.UserSummaryDTO;
+import domitila.auth.entity.Personal;
+import domitila.auth.service.PersonalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -58,7 +58,7 @@ public class UserController {
                 .correoElectronico(request.correoElectronico())
                 .telefono(request.telefono())
                 .dni(request.dni())
-                .sexo(request.sexo())
+                .genero(request.genero())
                 .fechaNacimiento(request.fechaNacimiento())
                 .domicilioCompleto(request.domicilioCompleto())
                 .numeroHijos(request.numeroHijos())
@@ -142,7 +142,7 @@ public class UserController {
                 .correoElectronico(request.correoElectronico())
                 .telefono(request.telefono())
                 .dni(request.dni())
-                .sexo(request.sexo())
+                .genero(request.genero())
                 .fechaNacimiento(request.fechaNacimiento())
                 .domicilioCompleto(request.domicilioCompleto())
                 .numeroHijos(request.numeroHijos())

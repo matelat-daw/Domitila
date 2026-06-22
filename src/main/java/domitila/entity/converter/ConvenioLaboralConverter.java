@@ -1,6 +1,6 @@
-package domitila.entity.converter;
+package domitila.auth.entity.converter;
 
-import domitila.enums.ConvenioLaboral;
+import domitila.auth.enums.ConvenioLaboral;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,4 +1,4 @@
-package domitila.config;
+package domitila.auth.config;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package domitila.service;
+package domitila.auth.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,16 +1,16 @@
-package domitila.service;
+package domitila.auth.service;
 
-import domitila.dto.UserSummaryDTO;
-import domitila.entity.Personal;
-import domitila.enums.ConvenioLaboral;
-import domitila.enums.GrupoProfesional;
-import domitila.enums.RoleName;
-import domitila.enums.Sexo;
-import domitila.enums.TipoContrato;
-import domitila.enums.TipoJornada;
-import domitila.repository.PersonalRepository;
-import domitila.security.PersonalDetails;
-import domitila.util.DocumentoIdentidadUtil;
+import domitila.auth.dto.UserSummaryDTO;
+import domitila.auth.entity.Personal;
+import domitila.auth.enums.ConvenioLaboral;
+import domitila.auth.enums.GrupoProfesional;
+import domitila.auth.enums.RoleName;
+import domitila.auth.enums.Genero;
+import domitila.auth.enums.TipoContrato;
+import domitila.auth.enums.TipoJornada;
+import domitila.auth.repository.PersonalRepository;
+import domitila.auth.security.PersonalDetails;
+import domitila.auth.util.DocumentoIdentidadUtil;
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -152,9 +152,9 @@ public class PersonalService implements UserDetailsService {
             personalExistente.setDni(dniActualizado);
         }
 
-        Sexo sexoActualizado = datosActualizados.getSexo();
-        if (sexoActualizado != null) {
-            personalExistente.setSexo(sexoActualizado);
+        Genero generoActualizado = datosActualizados.getGenero();
+        if (generoActualizado != null) {
+            personalExistente.setGenero(generoActualizado);
         }
 
         if (datosActualizados.getFechaNacimiento() != null) {
@@ -388,7 +388,7 @@ public class PersonalService implements UserDetailsService {
                 personal.getApellido2(),
                 personal.getCorreoElectronico(),
                 personal.getTelefono(),
-                personal.getSexo() == null ? null : personal.getSexo().getDisplayName(),
+                personal.getGenero() == null ? null : personal.getGenero().getDisplayName(),
                 roles,
                 personal.getImagenPerfil(),
                 personal.getActivo()
@@ -418,8 +418,8 @@ public class PersonalService implements UserDetailsService {
     }
 
     private void aplicarDefaultsPersonal(Personal personal) {
-        if (personal.getSexo() == null) {
-            personal.setSexo(Sexo.NO_BINARIO);
+        if (personal.getGenero() == null) {
+            personal.setGenero(Genero.NO_BINARIO);
         }
         if (personal.getNumeroHijos() == null) {
             personal.setNumeroHijos(0);

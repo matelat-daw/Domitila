@@ -1,4 +1,4 @@
-package domitila.config;
+package domitila.auth.config;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,16 +1,19 @@
-package domitila.entity;
+package domitila.auth.entity;
 
-import domitila.entity.converter.ConvenioLaboralConverter;
-import domitila.entity.converter.GrupoProfesionalConverter;
-import domitila.entity.converter.SexoConverter;
-import domitila.entity.converter.TipoContratoConverter;
-import domitila.entity.converter.TipoJornadaConverter;
-import domitila.enums.ConvenioLaboral;
-import domitila.enums.GrupoProfesional;
-import domitila.enums.RoleName;
-import domitila.enums.Sexo;
-import domitila.enums.TipoContrato;
-import domitila.enums.TipoJornada;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import domitila.proyecto.Proyecto;
+import domitila.auth.entity.converter.ConvenioLaboralConverter;
+import domitila.auth.entity.converter.GrupoProfesionalConverter;
+import domitila.auth.entity.converter.GeneroConverter;
+import domitila.auth.entity.converter.TipoContratoConverter;
+import domitila.auth.entity.converter.TipoJornadaConverter;
+import domitila.auth.enums.ConvenioLaboral;
+import domitila.auth.enums.GrupoProfesional;
+import domitila.auth.enums.RoleName;
+import domitila.auth.enums.Genero;
+import domitila.auth.enums.TipoContrato;
+import domitila.auth.enums.TipoJornada;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,11 +34,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"clave"})
-// @ToString(exclude = {"clave", "roles", "proyectos"})
+@ToString(exclude = {"clave", "roles", "proyectos"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Personal {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -55,10 +57,10 @@ public class Personal {
     @Builder.Default
     private String dni = "PENDIENTE";
 
-    @Convert(converter = SexoConverter.class)
-    @Column(name = "sexo", nullable = false, length = 16)
+    @Convert(converter = GeneroConverter.class)
+    @Column(name = "genero", nullable = false, length = 16)
     @Builder.Default
-    private Sexo sexo = Sexo.NO_BINARIO;
+    private Genero genero = Genero.NO_BINARIO;
 
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
@@ -140,7 +142,7 @@ public class Personal {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "personal_laboral_role",
-            joinColumns = @JoinColumn(name = "trabajador_id", referencedColumnName = "id_trabajador")
+            joinColumns = @JoinColumn(name = "personal_laboral_id", referencedColumnName = "id")
     )
     @Enumerated(EnumType.STRING)
     @Column(name = "role_id", nullable = false, length = 20)
@@ -154,5 +156,6 @@ public class Personal {
             inverseJoinColumns = @JoinColumn(name = "id_proyecto", referencedColumnName = "id")
     )
     @Builder.Default
+    @JsonIgnore
     private Set<Proyecto> proyectos = new HashSet<>();
 }

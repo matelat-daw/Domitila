@@ -1,4 +1,4 @@
-package domitila.dto;
+package domitila.auth.dto;
 
 import java.util.List;
 

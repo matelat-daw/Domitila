@@ -1,9 +1,9 @@
-package domitila.controller;
+package domitila.auth.controller;
 
-import domitila.dto.LoginRequestDTO;
-import domitila.dto.UserSummaryDTO;
-import domitila.service.JwtService;
-import domitila.service.PersonalService;
+import domitila.auth.dto.LoginRequestDTO;
+import domitila.auth.dto.UserSummaryDTO;
+import domitila.auth.service.JwtService;
+import domitila.auth.service.PersonalService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

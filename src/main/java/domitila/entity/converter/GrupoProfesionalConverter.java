@@ -1,6 +1,6 @@
-package domitila.entity.converter;
+package domitila.auth.entity.converter;
 
-import domitila.enums.GrupoProfesional;
+import domitila.auth.enums.GrupoProfesional;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

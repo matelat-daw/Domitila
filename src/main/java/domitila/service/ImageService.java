@@ -1,4 +1,4 @@
-package domitila.service;
+package domitila.auth.service;
 
 import java.io.IOException;
 import java.io.InputStream;

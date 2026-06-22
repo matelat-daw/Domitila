@@ -1,4 +1,4 @@
-package domitila.enums;
+package domitila.auth.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

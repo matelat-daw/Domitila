@@ -1,17 +1,17 @@
-package domitila.enums;
+package domitila.auth.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
-public enum Sexo {
+public enum Genero {
     NO_BINARIO("No Binario"),
     MUJER("Mujer"),
     HOMBRE("Varón");
 
     private final String displayName;
 
-    Sexo(String displayName) {
+    Genero(String displayName) {
         this.displayName = displayName;
     }
 
@@ -21,7 +21,7 @@ public enum Sexo {
     }
 
     @JsonCreator
-    public static Sexo fromValue(String value) {
+    public static Genero fromValue(String value) {
         if (value == null || value.isBlank()) {
             return null;
         }

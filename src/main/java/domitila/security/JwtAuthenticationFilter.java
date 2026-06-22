@@ -1,6 +1,5 @@
-package domitila.security;
+package domitila.auth.security;
 
-import domitila.service.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,6 +16,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils; // 👈 Importante para simplificar cookies
+
+import domitila.auth.service.JwtService;
 
 @Component
 @RequiredArgsConstructor

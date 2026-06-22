@@ -1,4 +1,4 @@
-package domitila.config;
+package domitila.auth.config;
 
 import jakarta.validation.ConstraintViolationException;
 import java.util.stream.Collectors;

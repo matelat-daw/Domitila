@@ -1,4 +1,4 @@
-package domitila.config;
+package domitila.auth.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;

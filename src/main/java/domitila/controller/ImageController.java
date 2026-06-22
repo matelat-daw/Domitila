@@ -1,6 +1,5 @@
-package domitila.controller;
+package domitila.auth.controller;
 
-import domitila.service.ImageService;
 import jakarta.servlet.http.HttpServletRequest;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerMapping;
+
+import domitila.auth.service.ImageService;
 
 @RestController
 @RequestMapping("/api/images")

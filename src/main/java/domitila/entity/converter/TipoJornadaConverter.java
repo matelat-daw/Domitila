@@ -1,6 +1,6 @@
-package domitila.entity.converter;
+package domitila.auth.entity.converter;
 
-import domitila.enums.TipoJornada;
+import domitila.auth.enums.TipoJornada;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
