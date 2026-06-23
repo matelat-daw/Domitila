@@ -142,7 +142,7 @@ public class Personal {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "personal_laboral_proyecto",
+            name = "personal_proyecto",
             joinColumns = @JoinColumn(name = "id_personal_laboral", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_proyecto", referencedColumnName = "id")
     )
