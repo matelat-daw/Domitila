@@ -3,7 +3,7 @@ package domitila.auth.controller;
 import domitila.auth.dto.LoginRequestDTO;
 import domitila.auth.dto.UserSummaryDTO;
 import domitila.auth.service.JwtService;
-import domitila.auth.service.PersonalService;
+import domitila.personal.PersonalService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

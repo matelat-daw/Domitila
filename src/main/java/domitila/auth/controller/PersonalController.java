@@ -2,12 +2,12 @@ package domitila.auth.controller;
 
 import domitila.auth.dto.CreateUserResponseDTO;
 import domitila.auth.dto.RegisterRequestDTO;
-import domitila.auth.dto.UpdatePersonalRequestDTO;
+import domitila.personal.UpdatePersonalRequestDTO;
 import domitila.auth.dto.UpdateUserPasswordRequestDTO;
 import domitila.auth.dto.UpdateUserRoleRequestDTO;
 import domitila.auth.dto.UpdateUserStatusRequestDTO;
 import domitila.auth.dto.UserSummaryDTO;
-import domitila.auth.service.PersonalService;
+import domitila.personal.PersonalService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,9 +30,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/personal")
 @RequiredArgsConstructor
-public class UserController {
+public class PersonalController {
 
     private final PersonalService personalService;
 

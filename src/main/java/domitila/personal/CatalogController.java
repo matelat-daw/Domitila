@@ -1,16 +1,6 @@
-package domitila.auth.controller;
+package domitila.personal;
 
-import domitila.auth.dto.CatalogOptionDTO;
-import domitila.auth.dto.CatalogsResponseDTO;
-import domitila.auth.entity.GeneroCatalogo;
-import domitila.auth.entity.TipoContratoCatalogo;
-import domitila.auth.entity.TipoJornadaCatalogo;
-import domitila.auth.enums.ConvenioLaboral;
-import domitila.auth.enums.GrupoProfesional;
 import domitila.auth.enums.RoleName;
-import domitila.auth.repository.GeneroCatalogoRepository;
-import domitila.auth.repository.TipoContratoCatalogoRepository;
-import domitila.auth.repository.TipoJornadaCatalogoRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;

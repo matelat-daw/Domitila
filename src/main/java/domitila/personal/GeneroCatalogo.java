@@ -1,4 +1,4 @@
-package domitila.auth.entity;
+package domitila.personal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "tipo_contrato")
+@Table(name = "genero")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class TipoContratoCatalogo {
+public class GeneroCatalogo {
 
     @Id
     @Column(name = "id")

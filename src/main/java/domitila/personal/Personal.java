@@ -1,12 +1,10 @@
-package domitila.auth.entity;
+package domitila.personal;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import domitila.auth.proyecto.Proyecto;
-import domitila.auth.entity.converter.ConvenioLaboralConverter;
-import domitila.auth.entity.converter.GrupoProfesionalConverter;
-import domitila.auth.enums.ConvenioLaboral;
-import domitila.auth.enums.GrupoProfesional;
+import domitila.personal.converter.ConvenioLaboralConverter;
+import domitila.personal.converter.GrupoProfesionalConverter;
 import domitila.auth.enums.RoleName;
 import jakarta.persistence.*;
 import java.math.BigDecimal;

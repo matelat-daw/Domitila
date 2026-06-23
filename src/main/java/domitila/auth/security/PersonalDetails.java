@@ -1,6 +1,6 @@
 package domitila.auth.security;
 
-import domitila.auth.entity.Personal;
+import domitila.personal.Personal;
 import domitila.auth.enums.RoleName;
 
 import java.util.Collection;

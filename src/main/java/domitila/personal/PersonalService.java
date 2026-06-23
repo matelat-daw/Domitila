@@ -1,21 +1,11 @@
-package domitila.auth.service;
+package domitila.personal;
 
 import domitila.auth.dto.RegisterRequestDTO;
-import domitila.auth.dto.UpdatePersonalRequestDTO;
 import domitila.auth.dto.UserSummaryDTO;
-import domitila.auth.entity.GeneroCatalogo;
-import domitila.auth.entity.Personal;
-import domitila.auth.entity.TipoContratoCatalogo;
-import domitila.auth.entity.TipoJornadaCatalogo;
-import domitila.auth.enums.ConvenioLaboral;
-import domitila.auth.enums.GrupoProfesional;
 import domitila.auth.enums.RoleName;
-import domitila.auth.repository.GeneroCatalogoRepository;
-import domitila.auth.repository.PersonalRepository;
-import domitila.auth.repository.TipoContratoCatalogoRepository;
-import domitila.auth.repository.TipoJornadaCatalogoRepository;
 import domitila.auth.security.PersonalDetails;
 import domitila.auth.util.DocumentoIdentidadUtil;
+import domitila.auth.service.ImageService;
 import java.util.HashSet;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

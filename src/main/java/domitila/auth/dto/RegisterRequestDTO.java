@@ -6,9 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import domitila.auth.enums.ConvenioLaboral;
-import domitila.auth.enums.GrupoProfesional;
+import domitila.personal.ConvenioLaboral;
+import domitila.personal.GrupoProfesional;
 
 public record RegisterRequestDTO (
 

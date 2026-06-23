@@ -1,4 +1,4 @@
-package domitila.auth.entity;
+package domitila.personal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

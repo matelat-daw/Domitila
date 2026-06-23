@@ -1,4 +1,4 @@
-package domitila.auth.dto;
+package domitila.personal;
 
 public record CatalogOptionDTO(
         Integer id,

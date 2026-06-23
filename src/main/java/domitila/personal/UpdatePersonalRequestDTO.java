@@ -1,12 +1,9 @@
-package domitila.auth.dto;
+package domitila.personal;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import domitila.auth.enums.ConvenioLaboral;
-import domitila.auth.enums.GrupoProfesional;
 
 public record UpdatePersonalRequestDTO(
         @Size(min = 2, max = 32, message = "El nombre debe tener entre 2 y 32 caracteres")

@@ -1,6 +1,5 @@
-package domitila.auth.repository;
+package domitila.personal;
 
-import domitila.auth.entity.TipoJornadaCatalogo;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
